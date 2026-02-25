@@ -1,0 +1,561 @@
+{
+  "navigation": {
+    "home": "Home",
+    "services": "Services",
+    "contact": "Contact",
+    "login": "Login",
+    "getStarted": "Get Started",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "navigation": {
+      "user": {
+        "myStatus": "My Status",
+        "myCases": "My Cases",
+        "settings": "Settings"
+      },
+      "admin": {
+        "overview": "Overview",
+        "applications": "Applications",
+        "users": "User Management",
+        "reports": "Reports",
+        "settings": "Settings"
+      }
+    },
+    "welcome": "Welcome back",
+    "subtitle": "Here's what's happening with your immigration cases",
+    "newCase": {
+      "title": "New Case Submission",
+      "step1": {
+        "title": "Service Type",
+        "subtitle": "Select the immigration service you need to get started"
+      },
+      "step2": {
+        "title": "Personal Info",
+        "subtitle": "Provide your personal information for the application"
+      },
+      "step3": {
+        "title": "Documents",
+        "subtitle": "Upload the mandatory documents for processing"
+      },
+      "step4": {
+        "title": "Review",
+        "subtitle": "Review and submit your application"
+      }
+    },
+    "stats": {
+      "activeCases": "Active Cases",
+      "pendingActions": "Pending Actions",
+      "completed": "Completed",
+      "totalSpent": "Total Spent"
+    },
+    "recentCases": {
+      "title": "Recent Cases",
+      "viewAll": "View All",
+      "submitted": "Submitted",
+      "empty": "No cases found. Start by creating a new case."
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "subtitle": "Latest updates on your cases",
+      "empty": "No recent activity"
+    },
+    "cases": {
+      "title": "My Immigration Cases",
+      "subtitle": "View and manage all your active and past immigration applications.",
+      "submitNew": "Submit New Case",
+      "search": "Search cases...",
+      "view": "View details",
+      "empty": "No cases found matching your criteria.",
+      "stats": {
+        "total": "Total Cases",
+        "inProgress": "In Progress",
+        "underReview": "Under Review",
+        "completed": "Completed"
+      },
+      "filters": {
+        "allStatuses": "All Statuses",
+        "inProgress": "In Progress",
+        "underReview": "Under Review",
+        "completed": "Completed",
+        "pendingDocuments": "Pending Documents"
+      },
+      "table": {
+        "heading": "All Applications",
+        "subheading": "A detailed list of your current and past immigration files",
+        "caseId": "Case ID",
+        "type": "Program/Type",
+        "description": "Description",
+        "status": "Status",
+        "priority": "Priority",
+        "submitted": "Submitted",
+        "consultant": "Consultant",
+        "actions": "Actions"
+      }
+    }
+  },
+  "settings": {
+    "title": "Account Settings",
+    "backToDashboard": "Back to Dashboard",
+    "profile": {
+      "title": "Personal Information",
+      "subtitle": "Update your basic account details and contact information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "streetAddress": "Street Address",
+      "city": "City",
+      "province": "Province/State",
+      "postalCode": "Postal/Zip Code",
+      "save": "Save Changes"
+    },
+    "security": {
+      "title": "Security & Password",
+      "subtitle": "Manage your password and account security preferences",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "passwordHint": "Use at least 8 characters with a mix of letters, numbers & symbols",
+      "update": "Update Password"
+    },
+    "notifications": {
+      "title": "Email Notifications",
+      "subtitle": "Control which updates you receive in your inbox",
+      "emailLabel": "Case Update Notifications",
+      "emailDesc": "Get notified when there's a status change or message on your cases",
+      "save": "Save Preferences"
+    },
+    "language": {
+      "title": "Language & Region",
+      "subtitle": "Choose your preferred language for the dashboard",
+      "label": "Display Language",
+      "desc": "Select the language you want to use across the platform",
+      "save": "Save Language"
+    }
+  },
+  "landing": {
+    "hero": {
+      "badge": "ICCRC Licensed & Certified",
+      "verified": "Verified",
+      "title": "Your Trusted Partner for",
+      "titleSpan": "Canadian Immigration",
+      "subtitle": "Expert immigration consulting services to help you navigate your journey to Canada. From work permits to permanent residence, we provide professional guidance every step of the way.",
+      "primaryCta": "Get Started Today",
+      "secondaryCta": "Book Free Consultation",
+      "trust": {
+        "noHiddenFees": "No Hidden Fees",
+        "moneyBack": "Money-Back Guarantee",
+        "dataStored": "Data Stored in Canada"
+      },
+      "status": "Application Status",
+      "successRate": "98% Success Rate"
+    },
+    "trustBadges": {
+      "quebec": "Immigration, Francisation et Intégration Québec",
+      "quebecText": "Immigration, Francisation et Intégration",
+      "cicc": "College of Immigration",
+      "ccic": "Collège de l'immigration",
+      "govtCertified": "CERTIFIED",
+      "govtLabel": "GOVT"
+    },
+    "services": {
+      "title": "Immigration Services to Canada",
+      "subtitle": "We offer a wide range of immigration services to help you achieve your goal of living, working, or studying in Canada.",
+      "learnMore": "Learn More",
+      "items": {
+        "permanentResidence": {
+          "title": "Permanent Residence",
+          "desc": "Expert guidance on Express Entry, PNP, and other pathways to becoming a permanent resident of Canada."
+        },
+        "studyPermits": {
+          "title": "Study Permits",
+          "desc": "Help with choosing the right institution and securing your study permit to start your education in Canada."
+        },
+        "workPermits": {
+          "title": "Work Permits",
+          "desc": "Assistance with LMIA-exempt and LMIA-required work permits to help you legally work in Canada."
+        },
+        "familyImmigration": {
+          "title": "Family Sponsorship",
+          "desc": "Bringing your loved ones to Canada through spousal, parental, and other family sponsorship programs."
+        }
+      }
+    },
+    "howItWorks": {
+      "title": "Your Journey to Canada Made Simple",
+      "subtitle": "Follow our proven 4-step process to navigate the Canadian immigration system with confidence.",
+      "steps": {
+        "createAccount": {
+          "title": "Create Your Account",
+          "desc": "Sign up on our secure platform and provide your initial details to get started."
+        },
+        "submitDocs": {
+          "title": "Submit Documents",
+          "desc": "Upload your required documents through our encrypted portal for initial assessment."
+        },
+        "consultantAnalysis": {
+          "title": "Consultant Analysis",
+          "desc": "Our ICCRC certified consultants will review your profile and recommend the best pathway."
+        },
+        "trackUpdate": {
+          "title": "Track & Update",
+          "desc": "Monitor your application status in real-time and receive personalized updates."
+        }
+      }
+    },
+    "security": {
+      "title": "Security & Canadian Compliance",
+      "subtitle": "Your data is protected by the highest industry standards and stored locally in Canada.",
+      "items": {
+        "secureAuth": {
+          "title": "Secure Authentication",
+          "desc": "Multi-factor protection for your account"
+        },
+        "dataEncryption": {
+          "title": "256-bit Encryption",
+          "desc": "All documents are fully encrypted"
+        },
+        "canadianHosting": {
+          "title": "Canadian Hosting",
+          "desc": "Data never leaves Canadian soil"
+        },
+        "pciCompliance": {
+          "title": "PCI DSS Compliant",
+          "desc": "Highest standards in payment security"
+        },
+        "fraudProtection": {
+          "title": "Fraud Protection",
+          "desc": "Constant monitoring for suspicious activity"
+        }
+      }
+    },
+    "platform": {
+      "title": "A Secure Digital Platform",
+      "dashboardTitle": "Case Dashboard",
+      "cta": "Access Client Portal",
+      "caseItems": {
+        "workPermit": "Work Permit Application",
+        "docUpload": "Document Upload",
+        "paymentStatus": "Payment Status",
+        "inReview": "In Review",
+        "complete": "Complete",
+        "paid": "Paid"
+      },
+      "features": {
+        "account": {
+          "title": "Secure Account Creation",
+          "desc": "Multi-factor authentication and encrypted access"
+        },
+        "docs": {
+          "title": "Encrypted Document Upload",
+          "desc": "Bank-level security for all your documents"
+        },
+        "tracking": {
+          "title": "Real-time Case Tracking",
+          "desc": "Monitor your application progress 24/7"
+        },
+        "messaging": {
+          "title": "Secure Messaging",
+          "desc": "Direct communication with your consultant"
+        },
+        "payment": {
+          "title": "Online Payment",
+          "desc": "Secure credit card processing"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Voices of Success",
+      "items": {
+        "sarah": {
+          "quote": "The platform made it so easy to track my Express Entry application. I always knew exactly what was happening."
+        },
+        "ahmed": {
+          "quote": "Excellent service and professional consultants. My study permit was approved faster than I expected."
+        },
+        "elena": {
+          "quote": "I highly recommend Larouss Immigration. They helped me reunite with my family in Canada."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Start Your Canadian Journey?",
+      "subtitle": "Join thousands of successful applicants who have found their way to Canada with our expert help.",
+      "primaryCta": "Create Your Account",
+      "secondaryCta": "Free Consultation",
+      "email": "info@larouss.com",
+      "locations": "Toronto • Montreal • Vancouver"
+    },
+    "footer": {
+      "columns": {
+        "company": {
+          "title": "Company",
+          "links": {
+            "aboutUs": "About Us",
+            "ourTeam": "Our Team",
+            "careers": "Careers",
+            "news": "News"
+          }
+        },
+        "services": {
+          "title": "Services",
+          "links": {
+            "permanentResidence": "Permanent Residence",
+            "studyPermits": "Study Permits",
+            "workPermits": "Work Permits",
+            "familyImmigration": "Family Immigration"
+          }
+        },
+        "clientPortal": {
+          "title": "Client Portal",
+          "links": {
+            "login": "Login",
+            "createAccount": "Create Account",
+            "caseTracking": "Case Tracking",
+            "support": "Support"
+          }
+        },
+        "legal": {
+          "title": "Legal",
+          "links": {
+            "privacyPolicy": "Privacy Policy",
+            "termsOfService": "Terms of Service",
+            "legalNotices": "Legal Notices",
+            "contact": "Contact"
+          }
+        }
+      },
+      "copyright": "© {year} Larouss Immigration. All rights reserved."
+    }
+  },
+  "services": {
+    "hero": {
+      "breadcrumb": "Immigration Services / All Programs",
+      "title": "Comprehensive Immigration Pathways to Canada",
+      "subtitle": "Explore our expert consulting services designed to simplify your journey to Canada. We provide professional assistance for all types of visa and residency applications.",
+      "primaryCta": "Start My Assessment",
+      "secondaryCta": "View Full Fee Schedule"
+    },
+    "grid": {
+      "title": "Our Specialized Programs",
+      "subtitle": "Choose the right pathway for your unique situation with guidance from certified ICCRC consultants.",
+      "startingAt": "Professional fees starting at",
+      "items": {
+        "permanentResidence": {
+          "title": "Permanent Residence",
+          "desc": "Express Entry, Provincial Nominees, and Skilled Worker programs.",
+          "features": {
+            "eligibilityAssessment": "Initial eligibility assessment",
+            "applicationPrep": "Full application preparation",
+            "citizenshipTestPrep": "Post-landing support"
+          }
+        },
+        "familyImmigration": {
+          "title": "Family Sponsorship",
+          "desc": "Reunite with your loved ones through family-based pathways.",
+          "features": {
+            "spousePartner": "Spouse & partner sponsorship",
+            "parentGrandparent": "Parents & grandparents",
+            "dependentChildren": "Dependent children"
+          }
+        },
+        "studyPermits": {
+          "title": "Study Permits",
+          "desc": "Pursue your education at Canada's world-class institutions.",
+          "features": {
+            "schoolSelection": "Designated Learning Institution (DLI) assistance",
+            "studyPermitApps": "Study permit documentation",
+            "postGraduation": "Post-graduate work permit support"
+          }
+        },
+        "workPermits": {
+          "title": "Work Permits",
+          "desc": "Legal pathways to work in Canada's diverse industries.",
+          "features": {
+            "openWorkPermits": "Open work permits",
+            "lmiaPermits": "Employer-specific (LMIA) permits",
+            "ihcWorkingHoliday": "International Experience Canada (IEC)"
+          }
+        }
+      }
+    },
+    "process": {
+      "title": "Our Streamlined Process",
+      "subtitle": "From initial consultation to final approval, we manage every detail of your application.",
+      "steps": {
+        "freeConsultation": {
+          "title": "Free Consultation",
+          "desc": "Initial 15-minute assessment of your immigration goals."
+        },
+        "documentPreparation": {
+          "title": "Document Preparation",
+          "desc": "Collecting and certifying all required supporting documents."
+        },
+        "applicationSubmission": {
+          "title": "Application Submission",
+          "desc": "Official filing with IRCC and provincial authorities."
+        },
+        "approvalSupport": {
+          "title": "Approval Support",
+          "desc": "Constant monitoring and response to IRCC inquiries."
+        }
+      },
+      "stats": {
+        "successfulApplications": "Successful Applications",
+        "approvalRate": "Approval Rate",
+        "yearsExperience": "Years of Experience"
+      },
+      "bottomCta": {
+        "title": "Don't Navigate This Alone",
+        "subtitle": "Canadian immigration laws change frequently. Our experts stay current so you don't have to.",
+        "primaryCta": "Begin Your Journey",
+        "secondaryCta": "Contact Our Team"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "branding": {
+        "badge": "Authorized Canadian Immigration Consultant",
+        "title": "Your Trusted Partner for Canadian Immigration",
+        "subtitle": "Expert guidance through every step of your journey to Canada. We specialize in all immigration programs and visa categories.",
+        "stat1": "Successful Cases",
+        "stat2": "Success Rate",
+        "features": {
+          "rcic": "Licensed RCIC (Regulated Canadian Immigration Consultant)",
+          "programs": "Express Entry, Study Permits, Work Permits & More",
+          "tracking": "Real-time Application Tracking & Updates",
+          "bilingual": "Bilingual Support (English & French)"
+        },
+        "certTitle": "ICCRC Certified",
+        "certSub": "Immigration Consultants of Canada Regulatory Council"
+      },
+      "form": {
+        "title": "Welcome Back",
+        "subtitle": "Sign in to continue your Canadian immigration journey",
+        "email": "Email Address",
+        "password": "Password",
+        "rememberMe": "Remember me",
+        "forgotPassword": "Forgot password?",
+        "signIn": "Sign In",
+        "signingIn": "Signing in...",
+        "or": "or",
+        "noAccount": "Don't have an account?",
+        "createAccount": "Create account"
+      }
+    },
+    "signup": {
+      "branding": {
+        "badge": "Serving Clients Worldwide Since 2010",
+        "title": "Why Choose Larouss Immigration?",
+        "subtitle": "Transparent process, dedicated support, and proven results. Join thousands of successful applicants who trusted us with their Canadian dream.",
+        "steps": {
+          "step1": {
+            "title": "Step 1: Assessment",
+            "desc": "Comprehensive evaluation of your eligibility and best pathway to Canada"
+          },
+          "step2": {
+            "title": "Step 2: Preparation",
+            "desc": "Expert assistance with document preparation and application submission"
+          },
+          "step3": {
+            "title": "Step 3: Follow-up",
+            "desc": "Continuous monitoring and support until you receive your approval"
+          }
+        },
+        "perks": {
+          "consultation": "Free Initial Consultation",
+          "portal": "24/7 Online Portal",
+          "vault": "Document Vault",
+          "payment": "Flexible Payment Plans"
+        },
+        "officeTitle": "Offices in Toronto, Vancouver & Montreal",
+        "officeSub": "Meet with our experts in person or online from anywhere in the world"
+      },
+      "form": {
+        "title": "Start Your Journey",
+        "subtitle": "Create your account to begin your path to Canada",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "passwordMismatch": "Passwords do not match",
+        "agreePrefix": "I agree to the",
+        "terms": "Terms of Service",
+        "and": "and",
+        "privacy": "Privacy Policy",
+        "createAccount": "Create Account",
+        "creating": "Creating account...",
+        "haveAccount": "Already have an account?",
+        "signIn": "Sign in"
+      }
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Get in Touch",
+      "subtitle": "Have questions about your immigration journey? Our expert team is here to help. Contact us today for a free consultation."
+    },
+    "info": {
+      "phoneTitle": "Phone Support",
+      "phoneHours": "Available Mon–Fri, 9 AM – 6 PM EST",
+      "emailTitle": "Email Us",
+      "emailValue": "info@larouss.ca",
+      "emailResponse": "Response within 24 hours",
+      "portalTitle": "Online Portal",
+      "portalValue": "Client Dashboard",
+      "portalSub": "24/7 case tracking & updates"
+    },
+    "form": {
+      "title": "Send Us a Message",
+      "fullName": "Full Name",
+      "emailAddress": "Email Address",
+      "phoneNumber": "Phone Number",
+      "serviceOfInterest": "Service of Interest",
+      "selectService": "Select a service...",
+      "message": "Message",
+      "messagePlaceholder": "Tell us about your immigration needs...",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "successTitle": "Message Sent!",
+      "successDesc": "Thank you for reaching out. We'll get back to you within 24 hours.",
+      "services": {
+        "permanentResidence": "Permanent Residence",
+        "studyPermits": "Study Permits",
+        "workPermits": "Work Permits",
+        "familyImmigration": "Family Immigration"
+      }
+    },
+    "offices": {
+      "title": "Our Offices",
+      "toronto": {
+        "name": "Toronto Office"
+      },
+      "vancouver": {
+        "name": "Vancouver Office"
+      },
+      "montreal": {
+        "name": "Montreal Office"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "items": {
+        "responseTime": {
+          "question": "How quickly can I expect a response?",
+          "answer": "We typically respond to all inquiries within 24 hours during business days. For urgent matters, please call our phone line directly."
+        },
+        "virtualConsultations": {
+          "question": "Do you offer virtual consultations?",
+          "answer": "Yes! We offer both in-person and virtual consultations via video call. You can meet with our experts from anywhere in the world."
+        },
+        "initialConsultation": {
+          "question": "Is the initial consultation free?",
+          "answer": "Yes, we offer a free initial assessment to discuss your immigration goals and determine the best pathway for you."
+        }
+      }
+    }
+  }
+}
