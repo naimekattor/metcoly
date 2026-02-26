@@ -15,53 +15,11 @@
         "settings": "Settings"
       },
       "admin": {
-        "overview": {
-          "title": "Admin Dashboard",
-          "subtitle": "Overview of all cases and user activity",
-          "vsLastMonth": "vs last month",
-          "stats": {
-            "totalCases": "Total Cases",
-            "activeUsers": "Active Users",
-            "pendingReview": "Pending Review",
-            "revenue": "Revenue (MTD)"
-          },
-          "charts": {
-            "monthlyCases": "Monthly Cases",
-            "monthlyCasesDesc": "Number of cases submitted per month",
-            "revenueTrend": "Revenue Trend",
-            "revenueTrendDesc": "Monthly revenue in USD"
-          },
-          "table": {
-            "title": "All Cases",
-            "subtitle": "Manage and track all immigration cases",
-            "export": "Export",
-            "search": "Search by case ID or client name...",
-            "empty": "No cases match your search.",
-            "edit": "Edit case",
-            "view": "View case",
-            "filters": {
-              "all": "All Status",
-              "inReview": "In Review",
-              "docsRequired": "Documents Required",
-              "submitted": "Submitted",
-              "approved": "Approved",
-              "rejected": "Rejected"
-            },
-            "cols": {
-              "caseId": "Case ID",
-              "client": "Client",
-              "type": "Type",
-              "status": "Status",
-              "submitted": "Submitted",
-              "fee": "Fee",
-              "payment": "Payment",
-              "actions": "Actions"
-            }
-          }
-        },
-        "applications": "Cases",
-        "reports": "Analytics",
-        "settings": "Settings"
+        "overview": "Overview",
+        "applications": "Applications",
+        "reports": "Reports",
+        "settings": "Settings",
+        "users": "Users"
       }
     },
     "welcome": "Welcome back",
@@ -177,10 +135,64 @@
     }
   },
   "admin": {
-    "cases": {
-      "title": "Manage Applications",
-      "subtitle": "Review and manage all client immigration files.",
-      "newCase": "New Case",
+    "overview": {
+      "title": "Admin Dashboard",
+      "subtitle": "Overview of all cases and user activity",
+      "vsLastMonth": "vs last month",
+      "stats": {
+        "totalCases": "Total Cases",
+        "activeUsers": "Active Users",
+        "pendingReview": "Pending Review",
+        "revenue": "Revenue (MTD)"
+      },
+      "charts": {
+        "monthlyCases": "Monthly Cases",
+        "monthlyCasesDesc": "Number of cases submitted per month",
+        "revenueTrend": "Revenue Trend",
+        "revenueTrendDesc": "Monthly revenue in USD"
+      },
+      "table": {
+        "title": "All Cases",
+        "subtitle": "Manage and track all immigration cases",
+        "export": "Export",
+        "search": "Search by case ID or client name...",
+        "empty": "No cases match your search.",
+        "view": "View",
+        "filters": {
+          "all": "All Status",
+          "inReview": "In Review",
+          "docsRequired": "Documents Required",
+          "submitted": "Submitted",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "cols": {
+          "caseId": "Case ID",
+          "client": "Client",
+          "type": "Type",
+          "status": "Status",
+          "submitted": "Submitted",
+          "fee": "Fee",
+          "payment": "Payment",
+          "actions": "Actions"
+        }
+      }
+    },
+    "applications": {
+      "title": "Application Management",
+      "subtitle": "Review and process all client immigration applications",
+      "status": {
+        "inReview": "In Review",
+        "docsRequired": "Documents Required",
+        "submitted": "Submitted",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "priority": {
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
       "stats": {
         "total": "Total Cases",
         "inReview": "In Review",
@@ -188,7 +200,7 @@
         "rejected": "Rejected"
       },
       "table": {
-        "heading": "Recent Applications",
+        "heading": "All Applications",
         "export": "Export CSV",
         "search": "Search cases...",
         "empty": "No applications found matching your criteria.",
@@ -204,7 +216,187 @@
           "consultant": "Consultant",
           "actions": "Actions"
         }
+      },
+      "filters": {
+        "allStatus": "All Status",
+        "allTypes": "All Types"
+      },
+      "caseDetails": {
+        "backToCases": "Back to Cases",
+        "caseLabel": "Case",
+        "priority": {
+          "high": "High Priority",
+          "medium": "Medium Priority",
+          "low": "Low Priority"
+        },
+        "statusPill": {
+          "inProgress": "In Progress"
+        },
+        "tabs": {
+          "timeline": "Timeline",
+          "documents": "Documents",
+          "notes": "Notes"
+        },
+        "overview": {
+          "title": "Case Overview",
+          "submitted": "Submitted Date",
+          "updated": "Last Updated",
+          "type": "Case Type",
+          "assigned": "Assigned To"
+        },
+        "clientInfo": {
+          "title": "Client Information",
+          "label": "Client",
+          "viewProfile": "View Full Profile"
+        },
+        "quickActions": {
+          "title": "Quick Actions",
+          "schedule": "Schedule Meeting",
+          "generate": "Generate Report",
+          "close": "Close Case"
+        },
+        "timeline": {
+          "title": "Case Timeline",
+          "subtitle": "Track the progress of this case.",
+          "steps": {
+            "submitted": "Case submitted",
+            "review": "Initial review completed",
+            "docs": "Documents requested",
+            "awaiting": "Awaiting client documents",
+            "submit": "Submit application"
+          }
+        },
+        "documents": {
+          "title": "Documents",
+          "subtitle": "Case documents and their status",
+          "empty": "No documents found."
+        },
+        "notes": {
+          "title": "Internal Notes",
+          "subtitle": "Add notes visible only to your team.",
+          "placeholder": "Add a new note about this case...",
+          "save": "Save Note"
+        }
+      },
+      "modal": {
+        "deleteTitle": "Delete Case",
+        "deleteConfirm": "Are you sure you want to delete {caseId}? This action cannot be undone.",
+        "cancel": "Cancel",
+        "delete": "Delete"
       }
+    },
+    "reports": {
+      "title": "Analytics & Reports",
+      "subtitle": "Comprehensive insights and performance metrics",
+      "tabs": {
+        "case": "Case Analytics",
+        "revenue": "Revenue Analytics"
+      },
+      "stats": {
+        "totalCases": "Total Cases",
+        "revenue": "Revenue",
+        "activeUsers": "Active Users",
+        "avgProcessing": "Avg. Processing Time",
+        "avgProcessingValue": "{days} days",
+        "vsLastPeriod": "vs last period"
+      },
+      "periods": {
+        "last3Months": "Last 3 Months",
+        "last6Months": "Last 6 Months",
+        "lastYear": "Last Year",
+        "thisYear": "This Year"
+      },
+      "charts": {
+        "casesByMonth": "Cases by Month",
+        "casesByMonthDesc": "Monthly case submission trends",
+        "casesByType": "Cases by Type",
+        "casesByTypeDesc": "Distribution of case types",
+        "approvalVsRejected": "Approval vs Rejected",
+        "approvalVsRejectedDesc": "Monthly outcome comparison",
+        "revenueTrend": "Revenue Trend",
+        "revenueTrendDesc": "Monthly revenue growth",
+        "revenueByType": "Revenue by Type",
+        "revenueByTypeDesc": "Distribution of revenue by type",
+        "revenueByConsultant": "Revenue by Consultant",
+        "revenueByConsultantDesc": "Breakdown per consultant"
+      },
+      "summary": {
+        "caseStatus": "Case Status Summary",
+        "caseStatusDesc": "Current breakdown by status",
+        "payment": "Payment Summary",
+        "paymentDesc": "Paid vs outstanding"
+      }
+    },
+    "settings": {
+      "title": "Admin Settings",
+      "subtitle": "System configuration and global preferences",
+      "tabs": {
+        "profile": "Profile",
+        "security": "Security",
+        "notifications": "Notifications",
+        "preferences": "Preferences",
+        "activity": "Activity"
+      },
+      "profile": {
+        "title": "Personal Information",
+        "subtitle": "Update your personal and professional details",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "position": "Position",
+        "department": "Department",
+        "employeeId": "Employee ID",
+        "dateJoined": "Date Joined",
+        "bio": "Professional Bio",
+        "bioPlaceholder": "Tell us about yourself...",
+        "save": "Save Changes"
+      },
+      "security": {
+        "title": "Change Password",
+        "subtitle": "Update your password to keep your account secure",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "passwordHint": "Must be at least 8 characters with uppercase, lowercase, and numbers",
+        "update": "Update Password"
+      },
+      "notifications": {
+        "title": "Notification Preferences",
+        "subtitle": "Choose what notifications you want to receive",
+        "caseGroup": "Case Notifications",
+        "newCase": "New Case Assigned",
+        "newCaseDesc": "When a new case is assigned to you",
+        "statusUpdate": "Case Status Updates",
+        "statusUpdateDesc": "When case status changes",
+        "docUpload": "Document Uploaded",
+        "docUploadDesc": "When client uploads new documents",
+        "financeGroup": "Financial Notifications",
+        "payment": "Payment Received",
+        "paymentDesc": "When client makes a payment",
+        "save": "Save Preferences"
+      },
+      "preferences": {
+        "title": "System Preferences",
+        "subtitle": "Customize your dashboard experience",
+        "language": "Language",
+        "timezone": "Timezone",
+        "dateFormat": "Date Format",
+        "layout": "Dashboard Layout",
+        "save": "Save Preferences"
+      },
+      "activity": {
+        "title": "Recent Activity",
+        "subtitle": "Your recent actions and system events",
+        "viewAll": "View Full Activity Log",
+        "sessions": "Active Sessions",
+        "sessionsSubtitle": "Manage your active login sessions"
+      }
+    },
+    "users": {
+      "title": "User Management",
+      "subtitle": "Control user access and view profile details.",
+      "empty": "User management interface will go here."
     }
   },
   "landing": {

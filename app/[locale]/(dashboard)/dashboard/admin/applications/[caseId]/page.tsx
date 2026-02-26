@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { useLocale } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/nextInt/navigation';
 import { useParams } from 'next/navigation';
 import {
@@ -69,6 +69,8 @@ const STATUS_BADGE: Record<CaseStatus, string> = {
 };
 
 export default function AdminCaseDetailPage() {
+  const t      = useTranslations('admin.caseDetails');
+  const t_apps = useTranslations('admin.applications');
   const locale = useLocale();
   const params = useParams();
   const rawId  = params?.caseId as string | undefined;
@@ -92,13 +94,13 @@ export default function AdminCaseDetailPage() {
           className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-6"
         >
           <ArrowLeft size={16} />
-          <span>Back to Cases</span>
+          <span>{t('backToCases')}</span>
         </Link>
 
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
             <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-              Case
+              {t('caseLabel')}
             </p>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {currentCase.id}
@@ -109,10 +111,12 @@ export default function AdminCaseDetailPage() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-semibold">
-              High Priority
+              {currentCase.priority === 'High' && t('priority.high')}
+              {currentCase.priority === 'Medium' && t('priority.medium')}
+              {currentCase.priority === 'Low' && t('priority.low')}
             </span>
             <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-xs font-semibold">
-              In Progress
+              {t('statusPill.inProgress')}
             </span>
             <select
               value={status}
@@ -121,7 +125,11 @@ export default function AdminCaseDetailPage() {
             >
               {STATUS_OPTIONS.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {s === 'In Review' && t_apps('status.inReview')}
+                  {s === 'Documents Required' && t_apps('status.docsRequired')}
+                  {s === 'Submitted' && t_apps('status.submitted')}
+                  {s === 'Approved' && t_apps('status.approved')}
+                  {s === 'Rejected' && t_apps('status.rejected')}
                 </option>
               ))}
             </select>
@@ -133,7 +141,7 @@ export default function AdminCaseDetailPage() {
           {/* Case overview */}
           <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <h2 className="font-semibold text-gray-900 mb-1 text-base">
-              Case Overview
+              {t('overview.title')}
             </h2>
             <p className="text-gray-500 text-sm mb-4">
               Application for work permit extension for tech industry professional.
@@ -142,19 +150,19 @@ export default function AdminCaseDetailPage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs sm:text-sm">
               <div>
-                <p className="text-gray-400 mb-1">Submitted Date</p>
+                <p className="text-gray-400 mb-1">{t('overview.submitted')}</p>
                 <p className="font-semibold text-gray-900">{currentCase.submitted}</p>
               </div>
               <div>
-                <p className="text-gray-400 mb-1">Last Updated</p>
+                <p className="text-gray-400 mb-1">{t('overview.updated')}</p>
                 <p className="font-semibold text-gray-900">{currentCase.lastUpdate}</p>
               </div>
               <div>
-                <p className="text-gray-400 mb-1">Case Type</p>
+                <p className="text-gray-400 mb-1">{t('overview.type')}</p>
                 <p className="font-semibold text-gray-900">{currentCase.type}</p>
               </div>
               <div>
-                <p className="text-gray-400 mb-1">Assigned To</p>
+                <p className="text-gray-400 mb-1">{t('overview.assigned')}</p>
                 <p className="font-semibold text-gray-900">{currentCase.consultant}</p>
               </div>
             </div>
@@ -164,7 +172,7 @@ export default function AdminCaseDetailPage() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <div>
               <h3 className="font-semibold text-gray-900 mb-1 text-base">
-                Client Information
+                {t('clientInfo.title')}
               </h3>
               <div className="flex items-center gap-3 mt-3">
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-500">
@@ -174,7 +182,7 @@ export default function AdminCaseDetailPage() {
                   <p className="font-semibold text-gray-900 text-sm">
                     {currentCase.client}
                   </p>
-                  <p className="text-gray-400 text-xs">Client</p>
+                  <p className="text-gray-400 text-xs">{t('clientInfo.label')}</p>
                 </div>
               </div>
             </div>
@@ -191,30 +199,30 @@ export default function AdminCaseDetailPage() {
             </div>
 
             <button className="w-full border border-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition">
-              View Full Profile
+              {t('clientInfo.viewProfile')}
             </button>
 
             <div className="pt-3 border-t border-gray-100 space-y-2">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                Quick Actions
+                {t('quickActions.title')}
               </p>
               <div className="space-y-2">
                 <button className="w-full flex items-center justify-between px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700">
                   <span className="flex items-center gap-2">
                     <Calendar size={14} className="text-gray-400" />
-                    Schedule Meeting
+                    {t('quickActions.schedule')}
                   </span>
                 </button>
                 <button className="w-full flex items-center justify-between px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700">
                   <span className="flex items-center gap-2">
                     <FileText size={14} className="text-gray-400" />
-                    Generate Report
+                    {t('quickActions.generate')}
                   </span>
                 </button>
                 <button className="w-full flex items-center justify-between px-3 py-2 text-xs sm:text-sm border border-red-200 rounded-lg hover:bg-red-50 text-red-600">
                   <span className="flex items-center gap-2">
                     <AlertCircle size={14} />
-                    Close Case
+                    {t('quickActions.close')}
                   </span>
                 </button>
               </div>
@@ -226,9 +234,9 @@ export default function AdminCaseDetailPage() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm max-w-5xl">
           <div className="border-b border-gray-100 flex items-center gap-4 px-6">
             {[
-              { key: 'timeline', label: 'Timeline' },
-              { key: 'documents', label: 'Documents' },
-              { key: 'notes', label: 'Notes' },
+              { key: 'timeline', label: t('tabs.timeline') },
+              { key: 'documents', label: t('tabs.documents') },
+              { key: 'notes', label: t('tabs.notes') },
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -251,19 +259,19 @@ export default function AdminCaseDetailPage() {
             {activeTab === 'timeline' && (
               <div>
                 <h3 className="font-semibold text-gray-900 mb-1 text-base">
-                  Case Timeline
+                  {t('timeline.title')}
                 </h3>
                 <p className="text-gray-500 text-sm mb-6">
-                  Track the progress of this case.
+                  {t('timeline.subtitle')}
                 </p>
 
                 <div className="space-y-6">
                   {[
-                    { label: 'Case submitted', date: '2026-02-15', done: true },
-                    { label: 'Initial review completed', date: '2026-02-16', done: true },
-                    { label: 'Documents requested', date: '2026-02-17', done: true },
-                    { label: 'Awaiting client documents', date: '2026-02-18', done: status === 'In Review' || status === 'Documents Required' },
-                    { label: 'Submit application', date: 'Pending', done: status === 'Submitted' || status === 'Approved' || status === 'Rejected' },
+                    { label: t('timeline.steps.submitted'), date: '2026-02-15', done: true },
+                    { label: t('timeline.steps.review'), date: '2026-02-16', done: true },
+                    { label: t('timeline.steps.docs'), date: '2026-02-17', done: true },
+                    { label: t('timeline.steps.awaiting'), date: '2026-02-18', done: status === 'In Review' || status === 'Documents Required' },
+                    { label: t('timeline.steps.submit'), date: 'Pending', done: status === 'Submitted' || status === 'Approved' || status === 'Rejected' },
                   ].map((step, idx) => (
                     <div key={idx} className="flex gap-4">
                       <div className="flex flex-col items-center">
@@ -308,18 +316,18 @@ export default function AdminCaseDetailPage() {
 
             {activeTab === 'notes' && (
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900 text-base">Internal Notes</h3>
+                <h3 className="font-semibold text-gray-900 text-base">{t('notes.title')}</h3>
                 <p className="text-gray-500 text-sm">
-                  Add notes visible only to your team.
+                  {t('notes.subtitle')}
                 </p>
                 <textarea
                   rows={4}
                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                  placeholder="Add a new note about this case..."
+                  placeholder={t('notes.placeholder')}
                 />
                 <div className="flex justify-end">
                   <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">
-                    Save Note
+                    {t('notes.save')}
                   </button>
                 </div>
               </div>

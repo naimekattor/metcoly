@@ -117,8 +117,8 @@ const PieLabel = ({ cx, cy, midAngle, outerRadius, name, value }: any) => {
 };
 
 // ── Stat Card ─────────────────────────────────────────────────────────────────
-function StatCard({ label, value, icon: Icon, trend, up }: {
-  label: string; value: string; icon: React.ElementType; trend: string; up: boolean;
+function StatCard({ label, value, icon: Icon, trend, up, t }: {
+  label: string; value: string; icon: React.ElementType; trend: string; up: boolean; t: any;
 }) {
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
@@ -129,7 +129,7 @@ function StatCard({ label, value, icon: Icon, trend, up }: {
       <p className="text-2xl font-bold text-gray-900">{value}</p>
       <div className={`flex items-center gap-1 text-xs font-semibold ${up ? 'text-green-500' : 'text-red-400'}`}>
         {up ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
-        {trend} <span className="text-gray-400 font-normal ml-1">vs last period</span>
+        {trend} <span className="text-gray-400 font-normal ml-1">{t('stats.vsLastPeriod')}</span>
       </div>
     </div>
   );
@@ -155,13 +155,14 @@ export default function AdminReportsPage() {
   const [tab, setTab]         = useState<Tab>('case');
   const [showPeriod, setShowPeriod] = useState(false);
 
+  const t = useTranslations('admin.reports');
   const PERIODS: Period[] = ['Last 3 Months', 'Last 6 Months', 'Last Year', 'This Year'];
 
   const stats = [
-    { label: 'Total Cases',           value: '126',      icon: FileText,    trend: '+24%', up: true  },
-    { label: 'Revenue',               value: '$34,200',  icon: DollarSign,  trend: '+18%', up: true  },
-    { label: 'Active Users',          value: '284',      icon: Users,       trend: '+12%', up: true  },
-    { label: 'Avg. Processing Time',  value: '14 days',  icon: Clock,       trend: '-8%',  up: false },
+    { label: t('stats.totalCases'),   value: '126',      icon: FileText,    trend: '+24%', up: true  },
+    { label: t('stats.revenue'),      value: '$34,200',  icon: DollarSign,  trend: '+18%', up: true  },
+    { label: t('stats.activeUsers'),  value: '284',      icon: Users,       trend: '+12%', up: true  },
+    { label: t('stats.avgProcessing'),value: t('stats.avgProcessingValue', { days: 14 }),  icon: Clock,       trend: '-8%',  up: false },
   ];
 
   const caseAnalyticsContent = (
@@ -170,8 +171,8 @@ export default function AdminReportsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Cases by Month Bar Chart */}
         <ChartCard
-          title="Cases by Month"
-          subtitle="Monthly case submission trends"
+          title={t('charts.casesByMonth')}
+          subtitle={t('charts.casesByMonthDesc')}
         >
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={CASES_BY_MONTH} barSize={28}>
@@ -187,8 +188,8 @@ export default function AdminReportsPage() {
 
         {/* Cases by Type Pie Chart */}
         <ChartCard
-          title="Cases by Type"
-          subtitle="Distribution of case types"
+          title={t('charts.casesByType')}
+          subtitle={t('charts.casesByTypeDesc')}
         >
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
@@ -215,8 +216,8 @@ export default function AdminReportsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Approval vs Rejected Bar Chart */}
         <ChartCard
-          title="Approval vs Rejected"
-          subtitle="Monthly outcome comparison"
+          title={t('charts.approvalVsRejected')}
+          subtitle={t('charts.approvalVsRejectedDesc')}
         >
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={APPROVAL_TREND} barSize={18}>
@@ -233,8 +234,8 @@ export default function AdminReportsPage() {
 
         {/* Case Status Summary Table */}
         <ChartCard
-          title="Case Status Summary"
-          subtitle="Current breakdown by status"
+          title={t('summary.caseStatus')}
+          subtitle={t('summary.caseStatusDesc')}
         >
           <div className="flex flex-col gap-3">
             {[
@@ -269,8 +270,8 @@ export default function AdminReportsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Revenue by Month Line Chart */}
         <ChartCard
-          title="Revenue Trend"
-          subtitle="Monthly revenue growth"
+          title={t('charts.revenueTrend')}
+          subtitle={t('charts.revenueTrendDesc')}
         >
           <ResponsiveContainer width="100%" height={240}>
             <LineChart data={REVENUE_BY_MONTH}>
@@ -288,8 +289,8 @@ export default function AdminReportsPage() {
 
         {/* Revenue by Type Pie Chart */}
         <ChartCard
-          title="Revenue by Type"
-          subtitle="Distribution of revenue by type"
+          title={t('charts.revenueByType')}
+          subtitle={t('charts.revenueByTypeDesc')}
         >
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
@@ -316,8 +317,8 @@ export default function AdminReportsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue by Consultant Bar Chart */}
         <ChartCard
-          title="Revenue by Consultant"
-          subtitle="Breakdown per consultant"
+          title={t('charts.revenueByConsultant')}
+          subtitle={t('charts.revenueByConsultantDesc')}
         >
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={REVENUE_BY_CONSULTANT} layout="vertical" barSize={20}>
@@ -333,8 +334,8 @@ export default function AdminReportsPage() {
 
         {/* Payment Summary Table */}
         <ChartCard
-          title="Payment Summary"
-          subtitle="Paid vs outstanding"
+          title={t('summary.payment')}
+          subtitle={t('summary.paymentDesc')}
         >
           <div className="flex flex-col gap-3">
             {[
@@ -369,8 +370,8 @@ export default function AdminReportsPage() {
         {/* ── Header ── */}
         <div className="flex items-start justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Analytics & Reports</h1>
-            <p className="mt-1 text-gray-500 text-sm">Comprehensive insights and performance metrics</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('title')}</h1>
+            <p className="mt-1 text-gray-500 text-sm">{t('subtitle')}</p>
           </div>
 
           {/* Period selector */}
@@ -379,10 +380,14 @@ export default function AdminReportsPage() {
               onClick={() => setShowPeriod((v) => !v)}
               className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-xl hover:border-[#1b3d6e] transition-all shadow-sm"
             >
-              {period} <ChevronDown size={15} className={`transition-transform ${showPeriod ? 'rotate-180' : ''}`} />
+              {period === 'Last 3 Months' && t('periods.last3Months')}
+              {period === 'Last 6 Months' && t('periods.last6Months')}
+              {period === 'Last Year' && t('periods.lastYear')}
+              {period === 'This Year' && t('periods.thisYear')}
+              <ChevronDown size={15} className={`transition-transform ${showPeriod ? 'rotate-180' : ''}`} />
             </button>
             {showPeriod && (
-              <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden min-w-[160px]">
+                  <div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden min-w-[160px]">
                 {PERIODS.map((p) => (
                   <button
                     key={p}
@@ -391,7 +396,10 @@ export default function AdminReportsPage() {
                       p === period ? 'text-[#1b3d6e] font-semibold bg-blue-50' : 'text-gray-700'
                     }`}
                   >
-                    {p}
+                    {p === 'Last 3 Months' && t('periods.last3Months')}
+                    {p === 'Last 6 Months' && t('periods.last6Months')}
+                    {p === 'Last Year' && t('periods.lastYear')}
+                    {p === 'This Year' && t('periods.thisYear')}
                   </button>
                 ))}
               </div>
@@ -401,24 +409,24 @@ export default function AdminReportsPage() {
 
         {/* ── Tabs ── */}
         <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 w-fit mb-8 shadow-sm">
-          {(['case', 'revenue'] as Tab[]).map((t) => (
+          {(['case', 'revenue'] as Tab[]).map((tabKey) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={tabKey}
+              onClick={() => setTab(tabKey)}
               className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-                tab === t
+                tab === tabKey
                   ? 'bg-gray-900 text-white shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              {t === 'case' ? 'Case Analytics' : 'Revenue Analytics'}
+              {tabKey === 'case' ? t('tabs.case') : t('tabs.revenue')}
             </button>
           ))}
         </div>
 
         {/* ── Stat Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {stats.map((s) => <StatCard key={s.label} {...s} />)}
+          {stats.map((s) => <StatCard key={s.label} {...s} t={t} />)}
         </div>
 
         {/* Conditional content based on tab */}

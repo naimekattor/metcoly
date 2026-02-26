@@ -17,9 +17,9 @@
       "admin": {
         "overview": "Aperçu",
         "applications": "Demandes",
-        "users": "Gestion des utilisateurs",
         "reports": "Rapports",
-        "settings": "Paramètres"
+        "settings": "Paramètres",
+        "users": "Utilisateurs"
       }
     },
     "welcome": "Bon retour",
@@ -135,10 +135,64 @@
     }
   },
   "admin": {
-    "cases": {
-      "title": "Gérer les demandes",
-      "subtitle": "Passez en revue et gérez tous les dossiers d'immigration des clients.",
-      "newCase": "Nouveau dossier",
+    "overview": {
+      "title": "Tableau de bord administrateur",
+      "subtitle": "Aperçu de tous les dossiers et de l'activité des utilisateurs",
+      "vsLastMonth": "par rapport au mois dernier",
+      "stats": {
+        "totalCases": "Total des dossiers",
+        "activeUsers": "Utilisateurs actifs",
+        "pendingReview": "En attente de révision",
+        "revenue": "Revenu (MTD)"
+      },
+      "charts": {
+        "monthlyCases": "Dossiers mensuels",
+        "monthlyCasesDesc": "Nombre de dossiers soumis par mois",
+        "revenueTrend": "Tendance des revenus",
+        "revenueTrendDesc": "Revenu mensuel en USD"
+      },
+      "table": {
+        "title": "Tous les dossiers",
+        "subtitle": "Gérer et suivre tous les dossiers d'immigration",
+        "export": "Exporter",
+        "search": "Rechercher par ID de dossier ou nom de client...",
+        "empty": "Aucun dossier ne correspond à votre recherche.",
+        "view": "Voir",
+        "filters": {
+          "all": "Tous les statuts",
+          "inReview": "En révision",
+          "docsRequired": "Documents requis",
+          "submitted": "Soumis",
+          "approved": "Approuvé",
+          "rejected": "Rejeté"
+        },
+        "cols": {
+          "caseId": "ID du dossier",
+          "client": "Client",
+          "type": "Type",
+          "status": "Statut",
+          "submitted": "Soumis",
+          "fee": "Frais",
+          "payment": "Paiement",
+          "actions": "Actions"
+        }
+      }
+    },
+    "applications": {
+      "title": "Gestion des demandes",
+      "subtitle": "Réviser et traiter toutes les demandes d'immigration des clients",
+      "status": {
+        "inReview": "En révision",
+        "docsRequired": "Documents requis",
+        "submitted": "Soumis",
+        "approved": "Approuvé",
+        "rejected": "Rejeté"
+      },
+      "priority": {
+        "high": "Haute",
+        "medium": "Moyenne",
+        "low": "Basse"
+      },
       "stats": {
         "total": "Total des dossiers",
         "inReview": "En révision",
@@ -146,7 +200,7 @@
         "rejected": "Rejetée"
       },
       "table": {
-        "heading": "Demandes récentes",
+        "heading": "Toutes les demandes",
         "export": "Exporter CSV",
         "search": "Rechercher des dossiers...",
         "empty": "Aucune demande trouvée correspondant à vos critères.",
@@ -162,7 +216,187 @@
           "consultant": "Consultant",
           "actions": "Actions"
         }
+      },
+      "filters": {
+        "allStatus": "Tous les statuts",
+        "allTypes": "Tous les types"
+      },
+      "caseDetails": {
+        "backToCases": "Retour aux dossiers",
+        "caseLabel": "Dossier",
+        "priority": {
+          "high": "Haute priorité",
+          "medium": "Priorité moyenne",
+          "low": "Basse priorité"
+        },
+        "statusPill": {
+          "inProgress": "En cours"
+        },
+        "tabs": {
+          "timeline": "Chronologie",
+          "documents": "Documents",
+          "notes": "Notes"
+        },
+        "overview": {
+          "title": "Aperçu du dossier",
+          "submitted": "Date de soumission",
+          "updated": "Dernière mise à jour",
+          "type": "Type de dossier",
+          "assigned": "Assigné à"
+        },
+        "clientInfo": {
+          "title": "Informations client",
+          "label": "Client",
+          "viewProfile": "Voir le profil complet"
+        },
+        "quickActions": {
+          "title": "Actions rapides",
+          "schedule": "Planifier une réunion",
+          "generate": "Générer un rapport",
+          "close": "Fermer le dossier"
+        },
+        "timeline": {
+          "title": "Chronologie du dossier",
+          "subtitle": "Suivre la progression de ce dossier.",
+          "steps": {
+            "submitted": "Dossier soumis",
+            "review": "Révision initiale terminée",
+            "docs": "Documents demandés",
+            "awaiting": "En attente des documents du client",
+            "submit": "Soumettre la demande"
+          }
+        },
+        "documents": {
+          "title": "Documents",
+          "subtitle": "Documents du dossier et leur état",
+          "empty": "Aucun document trouvé."
+        },
+        "notes": {
+          "title": "Notes internes",
+          "subtitle": "Ajouter des notes visibles uniquement par votre équipe.",
+          "placeholder": "Ajouter une nouvelle note sur ce dossier...",
+          "save": "Enregistrer la note"
+        }
+      },
+      "modal": {
+        "deleteTitle": "Supprimer le dossier",
+        "deleteConfirm": "Êtes-vous sûr de vouloir supprimer {caseId} ? Cette action ne peut pas être annulée.",
+        "cancel": "Annuler",
+        "delete": "Supprimer"
       }
+    },
+    "reports": {
+      "title": "Analyses et rapports",
+      "subtitle": "Aperçu complet et indicateurs de performance",
+      "tabs": {
+        "case": "Analyse des dossiers",
+        "revenue": "Analyse des revenus"
+      },
+      "stats": {
+        "totalCases": "Total des dossiers",
+        "revenue": "Revenu",
+        "activeUsers": "Utilisateurs actifs",
+        "avgProcessing": "Délai de traitement moyen",
+        "avgProcessingValue": "{days} jours",
+        "vsLastPeriod": "par rapport à la période précédente"
+      },
+      "periods": {
+        "last3Months": "3 derniers mois",
+        "last6Months": "6 derniers mois",
+        "lastYear": "Année dernière",
+        "thisYear": "Cette année"
+      },
+      "charts": {
+        "casesByMonth": "Dossiers par mois",
+        "casesByMonthDesc": "Tendances mensuelles de soumission de dossiers",
+        "casesByType": "Dossiers par type",
+        "casesByTypeDesc": "Répartition des types de dossiers",
+        "approvalVsRejected": "Approbation vs Rejeté",
+        "approvalVsRejectedDesc": "Comparaison mensuelle des résultats",
+        "revenueTrend": "Tendance des revenus",
+        "revenueTrendDesc": "Croissance mensuelle des revenus",
+        "revenueByType": "Revenus par type",
+        "revenueByTypeDesc": "Répartition des revenus par type",
+        "revenueByConsultant": "Revenus par consultant",
+        "revenueByConsultantDesc": "Répartition par consultant"
+      },
+      "summary": {
+        "caseStatus": "Résumé du statut des dossiers",
+        "caseStatusDesc": "Répartition actuelle par statut",
+        "payment": "Résumé des paiements",
+        "paymentDesc": "Payé vs impayé"
+      }
+    },
+    "settings": {
+      "title": "Paramètres administrateur",
+      "subtitle": "Configuration du système et préférences globales",
+      "tabs": {
+        "profile": "Profil",
+        "security": "Sécurité",
+        "notifications": "Notifications",
+        "preferences": "Préférences",
+        "activity": "Activité"
+      },
+      "profile": {
+        "title": "Informations personnelles",
+        "subtitle": "Mettez à jour vos détails personnels et professionnels",
+        "firstName": "Prénom",
+        "lastName": "Nom de famille",
+        "email": "Adresse courriel",
+        "phone": "Numéro de téléphone",
+        "position": "Poste",
+        "department": "Département",
+        "employeeId": "ID de l'employé",
+        "dateJoined": "Date d'embauche",
+        "bio": "Biographie professionnelle",
+        "bioPlaceholder": "Parlez-nous de vous...",
+        "save": "Enregistrer les modifications"
+      },
+      "security": {
+        "title": "Modifier le mot de passe",
+        "subtitle": "Mettez à jour votre mot de passe pour sécuriser votre compte",
+        "currentPassword": "Mot de passe actuel",
+        "newPassword": "Nouveau mot de passe",
+        "confirmPassword": "Confirmer le nouveau mot de passe",
+        "passwordHint": "Doit contenir au moins 8 caractères avec des majuscules, des minuscules et des chiffres",
+        "update": "Mettre à jour le mot de passe"
+      },
+      "notifications": {
+        "title": "Préférences de notification",
+        "subtitle": "Choisissez les notifications que vous souhaitez recevoir",
+        "caseGroup": "Notifications de dossier",
+        "newCase": "Nouveau dossier assigné",
+        "newCaseDesc": "Lorsqu'un nouveau dossier vous est assigné",
+        "statusUpdate": "Mises à jour du statut du dossier",
+        "statusUpdateDesc": "Lorsqu'un statut de dossier change",
+        "docUpload": "Document téléchargé",
+        "docUploadDesc": "Lorsqu'un client télécharge de nouveaux documents",
+        "financeGroup": "Notifications financières",
+        "payment": "Paiement reçu",
+        "paymentDesc": "Lorsqu'un client effectue un paiement",
+        "save": "Enregistrer les préférences"
+      },
+      "preferences": {
+        "title": "Préférences du système",
+        "subtitle": "Personnalisez votre expérience du tableau de bord",
+        "language": "Langue",
+        "timezone": "Fuseau horaire",
+        "dateFormat": "Format de date",
+        "layout": "Mise en page du tableau de bord",
+        "save": "Enregistrer les préférences"
+      },
+      "activity": {
+        "title": "Activité récente",
+        "subtitle": "Vos actions récentes et événements système",
+        "viewAll": "Voir le journal d'activité complet",
+        "sessions": "Sessions actives",
+        "sessionsSubtitle": "Gérer vos sessions de connexion actives"
+      }
+    },
+    "users": {
+      "title": "Gestion des utilisateurs",
+      "subtitle": "Contrôlez l'accès des utilisateurs et visualisez les détails du profil.",
+      "empty": "L'interface de gestion des utilisateurs sera ici."
     }
   },
   "landing": {

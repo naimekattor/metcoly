@@ -84,8 +84,8 @@ function StatPill({ icon: Icon, label, value, color }: {
 }
 
 // ── Delete Confirm Modal ──────────────────────────────────────────────────────
-function DeleteModal({ caseId, onConfirm, onCancel }: {
-  caseId: string; onConfirm: () => void; onCancel: () => void;
+function DeleteModal({ caseId, onConfirm, onCancel, t }: {
+  caseId: string; onConfirm: () => void; onCancel: () => void; t: any;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -93,16 +93,16 @@ function DeleteModal({ caseId, onConfirm, onCancel }: {
         <div className="w-11 h-11 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Trash2 size={20} className="text-red-600" />
         </div>
-        <h3 className="font-bold text-gray-900 text-center text-base mb-1">Delete Case</h3>
+        <h3 className="font-bold text-gray-900 text-center text-base mb-1">{t('modal.deleteTitle')}</h3>
         <p className="text-gray-500 text-sm text-center mb-6">
-          Are you sure you want to delete <span className="font-semibold text-gray-700">{caseId}</span>? This action cannot be undone.
+          {t('modal.deleteConfirm', { caseId })}
         </p>
         <div className="flex gap-3">
           <button onClick={onCancel} className="flex-1 border border-gray-200 text-gray-700 text-sm font-semibold py-2.5 rounded-lg hover:bg-gray-50 transition">
-            Cancel
+            {t('modal.cancel')}
           </button>
           <button onClick={onConfirm} className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold py-2.5 rounded-lg transition">
-            Delete
+            {t('modal.delete')}
           </button>
         </div>
       </div>
@@ -157,12 +157,12 @@ export default function AdminCasesPage() {
   };
 
   const STATUS_OPTIONS: Array<{ value: 'all' | CaseStatus; label: string }> = [
-    { value: 'all',                label: 'All Status'           },
-    { value: 'In Review',          label: 'In Review'            },
-    { value: 'Documents Required', label: 'Documents Required'   },
-    { value: 'Submitted',          label: 'Submitted'            },
-    { value: 'Approved',           label: 'Approved'             },
-    { value: 'Rejected',           label: 'Rejected'             },
+    { value: 'all',                label: t('filters.allStatus')           },
+    { value: 'In Review',          label: t('status.inReview')            },
+    { value: 'Documents Required', label: t('status.docsRequired')   },
+    { value: 'Submitted',          label: t('status.submitted')            },
+    { value: 'Approved',           label: t('status.approved')             },
+    { value: 'Rejected',           label: t('status.rejected')             },
   ];
 
   return (
@@ -172,6 +172,7 @@ export default function AdminCasesPage() {
           caseId={deleteTarget}
           onConfirm={handleDelete}
           onCancel={() => setDeleteTarget(null)}
+          t={t}
         />
       )}
 
@@ -241,8 +242,8 @@ export default function AdminCasesPage() {
                   onChange={(e) => { setType(e.target.value); setPage(1); }}
                   className="pl-4 pr-7 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1b3d6e]/20 bg-white text-gray-700 transition appearance-none cursor-pointer"
                 >
-                  {caseTypes.map((t) => (
-                    <option key={t} value={t}>{t === 'all' ? 'All Types' : t}</option>
+                  {caseTypes.map((type) => (
+                    <option key={type} value={type}>{type === 'all' ? t('filters.allTypes') : type}</option>
                   ))}
                 </select>
               </div>
@@ -288,12 +289,18 @@ export default function AdminCasesPage() {
                           <td className="px-5 py-3.5 text-gray-500 text-sm whitespace-nowrap">{c.type}</td>
                           <td className="px-5 py-3.5">
                             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${STATUS_STYLES[c.status]}`}>
-                              {c.status}
+                              {c.status === 'In Review' && t('status.inReview')}
+                              {c.status === 'Documents Required' && t('status.docsRequired')}
+                              {c.status === 'Submitted' && t('status.submitted')}
+                              {c.status === 'Approved' && t('status.approved')}
+                              {c.status === 'Rejected' && t('status.rejected')}
                             </span>
                           </td>
                           <td className="px-5 py-3.5">
                             <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${PRIORITY_STYLES[c.priority]}`}>
-                              {c.priority}
+                              {c.priority === 'High' && t('priority.high')}
+                              {c.priority === 'Medium' && t('priority.medium')}
+                              {c.priority === 'Low' && t('priority.low')}
                             </span>
                           </td>
                           <td className="px-5 py-3.5">

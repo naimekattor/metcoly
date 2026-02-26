@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   User, Shield, Bell, Settings, Activity, LogOut,
   Mail, Phone, Briefcase, Calendar, MapPin, Building2,
@@ -94,7 +95,7 @@ function ToggleSwitch({ label, checked, onChange, description }: { label: string
 
 
 // ── Profile Tab Content ───────────────────────────────────────────────────────
-function ProfileTabContent() {
+function ProfileTabContent({ t }: { t: any }) {
   const [formData, setFormData] = useState({
     firstName: 'Admin',
     lastName: 'User',
@@ -124,16 +125,16 @@ function ProfileTabContent() {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-      <SectionHeader title="Personal Information" subtitle="Update your personal and professional details" icon={User} />
+      <SectionHeader title={t('profile.title')} subtitle={t('profile.subtitle')} icon={User} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-8">
-        <InputField label="First Name" placeholder="First Name" value={formData.firstName} onChange={handleChange} name="firstName" />
-        <InputField label="Last Name" placeholder="Last Name" value={formData.lastName} onChange={handleChange} name="lastName" />
-        <InputField label="Email Address" type="email" placeholder="Email Address" value={formData.email} onChange={handleChange} name="email" disabled />
-        <InputField label="Phone Number" placeholder="Phone Number" value={formData.phoneNumber} onChange={handleChange} name="phoneNumber" />
-        <InputField label="Position" placeholder="Position" value={formData.position} onChange={handleChange} name="position" />
+        <InputField label={t('profile.firstName')} placeholder={t('profile.firstName')} value={formData.firstName} onChange={handleChange} name="firstName" />
+        <InputField label={t('profile.lastName')} placeholder={t('profile.lastName')} value={formData.lastName} onChange={handleChange} name="lastName" />
+        <InputField label={t('profile.email')} type="email" placeholder={t('profile.email')} value={formData.email} onChange={handleChange} name="email" disabled />
+        <InputField label={t('profile.phone')} placeholder={t('profile.phone')} value={formData.phoneNumber} onChange={handleChange} name="phoneNumber" />
+        <InputField label={t('profile.position')} placeholder={t('profile.position')} value={formData.position} onChange={handleChange} name="position" />
         <SelectField
-          label="Department"
+          label={t('profile.department')}
           value={formData.department}
           onChange={handleChange}
           name="department"
@@ -144,14 +145,14 @@ function ProfileTabContent() {
             { value: 'Admin', label: 'Admin' },
           ]}
         />
-        <InputField label="Employee ID" placeholder="Employee ID" value={formData.employeeID} onChange={handleChange} name="employeeID" disabled />
-        <InputField label="Date Joined" type="date" placeholder="Date Joined" value={formData.dateJoined} onChange={handleChange} name="dateJoined" disabled />
+        <InputField label={t('profile.employeeId')} placeholder={t('profile.employeeId')} value={formData.employeeID} onChange={handleChange} name="employeeID" disabled />
+        <InputField label={t('profile.dateJoined')} type="date" placeholder={t('profile.dateJoined')} value={formData.dateJoined} onChange={handleChange} name="dateJoined" disabled />
 
         <div className="flex flex-col gap-2 md:col-span-2">
-          <label className="text-sm font-medium text-gray-700">Professional Bio</label>
+          <label className="text-sm font-medium text-gray-700">{t('profile.bio')}</label>
           <textarea
             rows={3}
-            placeholder="Tell us about yourself..."
+            placeholder={t('profile.bioPlaceholder')}
             value={formData.professionalBio}
             onChange={handleChange}
             name="professionalBio"
@@ -185,7 +186,7 @@ function ProfileTabContent() {
           onClick={handleSave}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-medium text-sm rounded-xl shadow-md hover:bg-[#1b3d6e] transition-colors"
         >
-          <CheckCircle size={18} /> Save Changes
+          <CheckCircle size={18} /> {t('profile.save')}
         </button>
       </div>
     </div>
@@ -193,7 +194,7 @@ function ProfileTabContent() {
 }
 
 // ── Security Tab Content ──────────────────────────────────────────────────────
-function SecurityTabContent() {
+function SecurityTabContent({ t }: { t: any }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -224,15 +225,15 @@ function SecurityTabContent() {
     <div className="space-y-6">
       {/* Change Password Section */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <SectionHeader title="Change Password" subtitle="Update your password to keep your account secure" icon={Lock} />
+        <SectionHeader title={t('security.title')} subtitle={t('security.subtitle')} icon={Lock} />
 
         <div className="grid grid-cols-1 gap-5 mb-6">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Current Password</label>
+            <label className="text-sm font-medium text-gray-700">{t('security.currentPassword')}</label>
             <div className="relative">
               <input
                 type={showCurrentPassword ? 'text' : 'password'}
-                placeholder="Enter current password"
+                placeholder={t('security.currentPassword')}
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#1b3d6e]/20 focus:border-[#1b3d6e] outline-none transition-all text-sm text-gray-800 pr-10"
@@ -248,11 +249,11 @@ function SecurityTabContent() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">New Password</label>
+            <label className="text-sm font-medium text-gray-700">{t('security.newPassword')}</label>
             <div className="relative">
               <input
                 type={showNewPassword ? 'text' : 'password'}
-                placeholder="Enter new password"
+                placeholder={t('security.newPassword')}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#1b3d6e]/20 focus:border-[#1b3d6e] outline-none transition-all text-sm text-gray-800 pr-10"
@@ -265,15 +266,15 @@ function SecurityTabContent() {
                 {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters with uppercase, lowercase, and numbers</p>
+            <p className="text-xs text-gray-500 mt-1">{t('security.passwordHint')}</p>
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Confirm New Password</label>
+            <label className="text-sm font-medium text-gray-700">{t('security.confirmPassword')}</label>
             <div className="relative">
               <input
                 type={showConfirmNewPassword ? 'text' : 'password'}
-                placeholder="Confirm new password"
+                placeholder={t('security.confirmPassword')}
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#1b3d6e]/20 focus:border-[#1b3d6e] outline-none transition-all text-sm text-gray-800 pr-10"
@@ -294,7 +295,7 @@ function SecurityTabContent() {
             onClick={handlePasswordChange}
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-medium text-sm rounded-xl shadow-md hover:bg-[#1b3d6e] transition-colors"
           >
-            <Lock size={18} /> Update Password
+            <Lock size={18} /> {t('security.update')}
           </button>
         </div>
       </div>
@@ -339,7 +340,7 @@ function SecurityTabContent() {
 }
 
 // ── Notifications Tab Content ─────────────────────────────────────────────────
-function NotificationsTabContent() {
+function NotificationsTabContent({ t }: { t: any }) {
   const [notifications, setNotifications] = useState({
     newCaseAssigned: true,
     caseStatusUpdates: true,
@@ -362,35 +363,35 @@ function NotificationsTabContent() {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-      <SectionHeader title="Notification Preferences" subtitle="Choose what notifications you want to receive" icon={Bell} />
+      <SectionHeader title={t('notifications.title')} subtitle={t('notifications.subtitle')} icon={Bell} />
 
       <div className="mb-8">
-        <h3 className="text-md font-semibold text-gray-800 mb-3">Case Notifications</h3>
+        <h3 className="text-md font-semibold text-gray-800 mb-3">{t('notifications.caseGroup')}</h3>
         <ToggleSwitch
-          label="New Case Assigned"
-          description="When a new case is assigned to you"
+          label={t('notifications.newCase')}
+          description={t('notifications.newCaseDesc')}
           checked={notifications.newCaseAssigned}
           onChange={() => handleToggle('newCaseAssigned')}
         />
         <ToggleSwitch
-          label="Case Status Updates"
-          description="When case status changes"
+          label={t('notifications.statusUpdate')}
+          description={t('notifications.statusUpdateDesc')}
           checked={notifications.caseStatusUpdates}
           onChange={() => handleToggle('caseStatusUpdates')}
         />
         <ToggleSwitch
-          label="Document Uploaded"
-          description="When client uploads new documents"
+          label={t('notifications.docUpload')}
+          description={t('notifications.docUploadDesc')}
           checked={notifications.documentUploaded}
           onChange={() => handleToggle('documentUploaded')}
         />
       </div>
 
       <div className="mb-8">
-        <h3 className="text-md font-semibold text-gray-800 mb-3">Financial Notifications</h3>
+        <h3 className="text-md font-semibold text-gray-800 mb-3">{t('notifications.financeGroup')}</h3>
         <ToggleSwitch
-          label="Payment Received"
-          description="When client makes a payment"
+          label={t('notifications.payment')}
+          description={t('notifications.paymentDesc')}
           checked={notifications.paymentReceived}
           onChange={() => handleToggle('paymentReceived')}
         />
@@ -433,7 +434,7 @@ function NotificationsTabContent() {
           onClick={handleSave}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-medium text-sm rounded-xl shadow-md hover:bg-[#1b3d6e] transition-colors"
         >
-          <CheckCircle size={18} /> Save Preferences
+          <CheckCircle size={18} /> {t('notifications.save')}
         </button>
       </div>
     </div>
@@ -441,7 +442,7 @@ function NotificationsTabContent() {
 }
 
 // ── Preferences Tab Content ───────────────────────────────────────────────────
-function PreferencesTabContent() {
+function PreferencesTabContent({ t }: { t: any }) {
   const [preferences, setPreferences] = useState({
     language: 'English',
     timezone: 'Toronto (EST)',
@@ -461,11 +462,11 @@ function PreferencesTabContent() {
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-      <SectionHeader title="System Preferences" subtitle="Customize your dashboard experience" icon={Settings} />
+      <SectionHeader title={t('preferences.title')} subtitle={t('preferences.subtitle')} icon={Settings} />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-8">
         <SelectField
-          label="Language"
+          label={t('preferences.language')}
           value={preferences.language}
           onChange={handleChange}
           name="language"
@@ -476,7 +477,7 @@ function PreferencesTabContent() {
           ]}
         />
         <SelectField
-          label="Timezone"
+          label={t('preferences.timezone')}
           value={preferences.timezone}
           onChange={handleChange}
           name="timezone"
@@ -487,7 +488,7 @@ function PreferencesTabContent() {
           ]}
         />
         <SelectField
-          label="Date Format"
+          label={t('preferences.dateFormat')}
           value={preferences.dateFormat}
           onChange={handleChange}
           name="dateFormat"
@@ -498,7 +499,7 @@ function PreferencesTabContent() {
           ]}
         />
         <SelectField
-          label="Dashboard Layout"
+          label={t('preferences.layout')}
           value={preferences.dashboardLayout}
           onChange={handleChange}
           name="dashboardLayout"
@@ -514,7 +515,7 @@ function PreferencesTabContent() {
           onClick={handleSave}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-medium text-sm rounded-xl shadow-md hover:bg-[#1b3d6e] transition-colors"
         >
-          <CheckCircle size={18} /> Save Preferences
+          <CheckCircle size={18} /> {t('preferences.save')}
         </button>
       </div>
     </div>
@@ -522,7 +523,7 @@ function PreferencesTabContent() {
 }
 
 // ── Activity Tab Content ──────────────────────────────────────────────────────
-function ActivityTabContent() {
+function ActivityTabContent({ t }: { t: any }) {
   const activityLog = [
     { id: 1, type: 'Updated case status', description: 'Case: CASE-2824-1234', time: '2 hours ago', icon: CheckCircle, color: 'text-green-500' },
     { id: 2, type: 'Reviewed documents', description: 'Case: CASE-2824-1235', time: '4 hours ago', icon: FileText, color: 'text-purple-500' },
@@ -541,7 +542,7 @@ function ActivityTabContent() {
     <div className="space-y-6">
       {/* Recent Activity */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <SectionHeader title="Recent Activity" subtitle="Your recent actions and system events" icon={Activity} />
+        <SectionHeader title={t('activity.title')} subtitle={t('activity.subtitle')} icon={Activity} />
         <div className="space-y-4">
           {activityLog.map((activity) => (
             <div key={activity.id} className="flex items-center gap-3">
@@ -556,14 +557,14 @@ function ActivityTabContent() {
         </div>
         <div className="mt-6 text-center">
           <button className="text-sm font-medium text-[#1b3d6e] hover:text-blue-700 transition-colors">
-            View Full Activity Log
+            {t('activity.viewAll')}
           </button>
         </div>
       </div>
 
       {/* Active Sessions */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <SectionHeader title="Active Sessions" subtitle="Manage your active login sessions" icon={Clock} />
+        <SectionHeader title={t('activity.sessions')} subtitle={t('activity.sessionsSubtitle')} icon={Clock} />
         <div className="space-y-4">
           {activeSessions.map((session) => (
             <div key={session.id} className="flex items-center gap-3">
@@ -588,22 +589,23 @@ function ActivityTabContent() {
 
 // ── Main Admin Profile Page Component ─────────────────────────────────────────
 export default function AdminProfilePage() {
+  const t = useTranslations('admin.settings');
   const [activeTab, setActiveTab] = useState<Tab>('profile');
 
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfileTabContent />;
+        return <ProfileTabContent t={t} />;
       case 'security':
-        return <SecurityTabContent />;
+        return <SecurityTabContent t={t} />;
       case 'notifications':
-        return <NotificationsTabContent />;
+        return <NotificationsTabContent t={t} />;
       case 'preferences':
-        return <PreferencesTabContent />;
+        return <PreferencesTabContent t={t} />;
       case 'activity':
-        return <ActivityTabContent />;
+        return <ActivityTabContent t={t} />;
       default:
-        return <ProfileTabContent />;
+        return <ProfileTabContent t={t} />;
     }
   };
 
@@ -613,8 +615,8 @@ export default function AdminProfilePage() {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Profile & Settings</h1>
-            <p className="mt-1 text-gray-500 text-sm">Manage your profile, security settings, and preferences</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('title')}</h1>
+            <p className="mt-1 text-gray-500 text-sm">{t('subtitle')}</p>
           </div>
           
         </div>
@@ -662,46 +664,22 @@ export default function AdminProfilePage() {
 
         {/* Tabs Navigation */}
         <div className="bg-white border border-gray-200 rounded-2xl p-1 flex items-center justify-between mb-8 shadow-sm">
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`flex-1 py-3 px-2 flex items-center justify-center gap-2 text-sm font-semibold rounded-xl transition-colors ${
-              activeTab === 'profile' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <User size={18} /> Profile
-          </button>
-          <button
-            onClick={() => setActiveTab('security')}
-            className={`flex-1 py-3 px-2 flex items-center justify-center gap-2 text-sm font-semibold rounded-xl transition-colors ${
-              activeTab === 'security' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Shield size={18} /> Security
-          </button>
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className={`flex-1 py-3 px-2 flex items-center justify-center gap-2 text-sm font-semibold rounded-xl transition-colors ${
-              activeTab === 'notifications' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Bell size={18} /> Notifications
-          </button>
-          <button
-            onClick={() => setActiveTab('preferences')}
-            className={`flex-1 py-3 px-2 flex items-center justify-center gap-2 text-sm font-semibold rounded-xl transition-colors ${
-              activeTab === 'preferences' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Settings size={18} /> Preferences
-          </button>
-          <button
-            onClick={() => setActiveTab('activity')}
-            className={`flex-1 py-3 px-2 flex items-center justify-center gap-2 text-sm font-semibold rounded-xl transition-colors ${
-              activeTab === 'activity' ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Activity size={18} /> Activity
-          </button>
+          {(['profile', 'security', 'notifications', 'preferences', 'activity'] as Tab[]).map((tabKey) => (
+            <button
+              key={tabKey}
+              onClick={() => setActiveTab(tabKey)}
+              className={`flex-1 py-3 px-2 flex items-center justify-center gap-2 text-sm font-semibold rounded-xl transition-colors ${
+                activeTab === tabKey ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {tabKey === 'profile' && <User size={18} />}
+              {tabKey === 'security' && <Shield size={18} />}
+              {tabKey === 'notifications' && <Bell size={18} />}
+              {tabKey === 'preferences' && <Settings size={18} />}
+              {tabKey === 'activity' && <Activity size={18} />}
+              {t(`tabs.${tabKey}`)}
+            </button>
+          ))}
         </div>
 
         {/* Tab Content */}

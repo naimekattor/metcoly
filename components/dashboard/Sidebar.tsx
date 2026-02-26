@@ -23,6 +23,7 @@ interface SidebarProps {
 
 export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
   const t = useTranslations('dashboard.navigation');
+  const t_admin = useTranslations('admin');
   const pathname = usePathname();
   const locale = useLocale();
 
@@ -41,10 +42,10 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
 
   const menuItems = role === 'admin' 
     ? [
-        { icon: LayoutDashboard, label: labelFromMessage('admin.overview'), href: '/dashboard/admin' },
-        { icon: ShieldCheck, label: labelFromMessage('admin.applications'), href: '/dashboard/admin/applications' },
-        { icon: FileText, label: labelFromMessage('admin.reports'), href: '/dashboard/admin/reports' },
-        { icon: Settings, label: labelFromMessage('admin.settings'), href: '/dashboard/admin/settings' },
+        { icon: LayoutDashboard, label: t_admin('overview.title'), href: '/dashboard/admin' },
+        { icon: ShieldCheck, label: t_admin('applications.title'), href: '/dashboard/admin/applications' },
+        { icon: FileText, label: t_admin('reports.title'), href: '/dashboard/admin/reports' },
+        { icon: Settings, label: t_admin('settings.title'), href: '/dashboard/admin/settings' },
       ]
     : [
         { icon: LayoutDashboard, label: labelFromMessage('user.myStatus'), href: '/dashboard/user' },
