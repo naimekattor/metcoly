@@ -54,8 +54,8 @@ export default function DashboardLayout({
           onMenuClick={() => setIsSidebarOpen(true)} 
           title={role === 'admin' ? 'Admin Control Center' : 'User Dashboard'}
         />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar">
-          <div className="max-w-7xl mx-auto h-full">
+        <main className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          <div className="h-full">
             {children}
           </div>
         </main>

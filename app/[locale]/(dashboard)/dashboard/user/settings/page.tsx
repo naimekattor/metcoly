@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import {
@@ -286,15 +286,14 @@ function LanguageSection() {
 export default function SettingsPage() {
   const t        = useTranslations('settings');
   const pathname = usePathname();
-  const locale   = pathname?.split('/')[1] || 'en';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+    <div className="min-h-screen ">
+      <div className="">
 
         {/* Back link */}
         <Link
-          href={`/${locale}/dashboard`}
+          href="/dashboard"
           className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#1b3d6e] mb-6 transition-colors"
         >
           <ChevronLeft size={16} /> {t('backToDashboard')}

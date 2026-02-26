@@ -15,10 +15,52 @@
         "settings": "Settings"
       },
       "admin": {
-        "overview": "Overview",
-        "applications": "Applications",
-        "users": "User Management",
-        "reports": "Reports",
+        "overview": {
+          "title": "Admin Dashboard",
+          "subtitle": "Overview of all cases and user activity",
+          "vsLastMonth": "vs last month",
+          "stats": {
+            "totalCases": "Total Cases",
+            "activeUsers": "Active Users",
+            "pendingReview": "Pending Review",
+            "revenue": "Revenue (MTD)"
+          },
+          "charts": {
+            "monthlyCases": "Monthly Cases",
+            "monthlyCasesDesc": "Number of cases submitted per month",
+            "revenueTrend": "Revenue Trend",
+            "revenueTrendDesc": "Monthly revenue in USD"
+          },
+          "table": {
+            "title": "All Cases",
+            "subtitle": "Manage and track all immigration cases",
+            "export": "Export",
+            "search": "Search by case ID or client name...",
+            "empty": "No cases match your search.",
+            "edit": "Edit case",
+            "view": "View case",
+            "filters": {
+              "all": "All Status",
+              "inReview": "In Review",
+              "docsRequired": "Documents Required",
+              "submitted": "Submitted",
+              "approved": "Approved",
+              "rejected": "Rejected"
+            },
+            "cols": {
+              "caseId": "Case ID",
+              "client": "Client",
+              "type": "Type",
+              "status": "Status",
+              "submitted": "Submitted",
+              "fee": "Fee",
+              "payment": "Payment",
+              "actions": "Actions"
+            }
+          }
+        },
+        "applications": "Cases",
+        "reports": "Analytics",
         "settings": "Settings"
       }
     },
@@ -132,6 +174,37 @@
       "label": "Display Language",
       "desc": "Select the language you want to use across the platform",
       "save": "Save Language"
+    }
+  },
+  "admin": {
+    "cases": {
+      "title": "Manage Applications",
+      "subtitle": "Review and manage all client immigration files.",
+      "newCase": "New Case",
+      "stats": {
+        "total": "Total Cases",
+        "inReview": "In Review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "table": {
+        "heading": "Recent Applications",
+        "export": "Export CSV",
+        "search": "Search cases...",
+        "empty": "No applications found matching your criteria.",
+        "cols": {
+          "caseId": "Case ID",
+          "client": "Client",
+          "type": "Type",
+          "status": "Status",
+          "priority": "Priority",
+          "submitted": "Submitted",
+          "fee": "Fee",
+          "payment": "Payment",
+          "consultant": "Consultant",
+          "actions": "Actions"
+        }
+      }
     }
   },
   "landing": {

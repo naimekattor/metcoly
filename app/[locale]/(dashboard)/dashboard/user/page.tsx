@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import {
@@ -77,7 +77,6 @@ function StatCard({
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
   const pathname = usePathname();
-  const locale = pathname?.split('/')[1] || 'en';
 
   const stats = [
     { label: t('stats.activeCases'),     value: 1,   icon: FileText,    iconColor: 'text-gray-400'   },
@@ -87,8 +86,8 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="min-h-screen ">
+      <div className="">
 
         {/* ── Header ── */}
         <div className="flex items-start justify-between mb-8 gap-4">
@@ -99,10 +98,10 @@ export default function DashboardPage() {
             <p className="mt-1 text-gray-500 text-sm">{t('subtitle')}</p>
           </div>
           <Link
-            href={`/${locale}/dashboard/user/my-cases/new`}
+            href="/dashboard/user/my-cases/new"
             className="inline-flex items-center gap-2 bg-[#1b3d6e] hover:bg-[#152f56] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all duration-200 active:scale-95 shadow-sm flex-shrink-0"
           >
-            <Plus size={16} /> {t('newCase')}
+            <Plus size={16} /> {t('cases.submitNew')}
           </Link>
         </div>
 
@@ -122,7 +121,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-900 text-base">{t('recentCases.title')}</h2>
               <Link
-                href={`/${locale}/dashboard/user/my-cases`}
+                href="/dashboard/user/my-cases"
                 className="inline-flex items-center gap-1 text-sm text-[#1b3d6e] font-medium hover:underline"
               >
                 {t('recentCases.viewAll')} <ArrowRight size={14} />
@@ -139,7 +138,7 @@ export default function DashboardPage() {
                 MOCK_CASES.map((c) => (
                   <Link
                     key={c.id}
-                    href={`/${locale}/dashboard/user/my-cases/${c.id}`}
+                    href={`/dashboard/user/my-cases/${c.id}`}
                     className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors duration-150"
                   >
                     <div className="flex flex-col gap-1">

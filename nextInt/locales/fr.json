@@ -134,6 +134,37 @@
       "save": "Enregistrer la langue"
     }
   },
+  "admin": {
+    "cases": {
+      "title": "Gérer les demandes",
+      "subtitle": "Passez en revue et gérez tous les dossiers d'immigration des clients.",
+      "newCase": "Nouveau dossier",
+      "stats": {
+        "total": "Total des dossiers",
+        "inReview": "En révision",
+        "approved": "Approuvée",
+        "rejected": "Rejetée"
+      },
+      "table": {
+        "heading": "Demandes récentes",
+        "export": "Exporter CSV",
+        "search": "Rechercher des dossiers...",
+        "empty": "Aucune demande trouvée correspondant à vos critères.",
+        "cols": {
+          "caseId": "ID du dossier",
+          "client": "Client",
+          "type": "Type",
+          "status": "Statut",
+          "priority": "Priorité",
+          "submitted": "Soumise",
+          "fee": "Frais",
+          "payment": "Paiement",
+          "consultant": "Consultant",
+          "actions": "Actions"
+        }
+      }
+    }
+  },
   "landing": {
     "hero": {
       "badge": "Certifié et titulaire d'un permis du CCIC",

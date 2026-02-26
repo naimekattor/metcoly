@@ -37,7 +37,7 @@ export default function Topbar({ onMenuClick, title = "Dashboard" }: TopbarProps
       </div>
 
       {/* Search Bar - Hidden on Mobile */}
-      <div className="hidden md:flex flex-1 max-w-md mx-8">
+      {/* <div className="hidden md:flex flex-1 max-w-md mx-8">
         <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input 
@@ -46,7 +46,7 @@ export default function Topbar({ onMenuClick, title = "Dashboard" }: TopbarProps
             className="w-full bg-gray-50 border border-gray-100 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all pb-2"
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="flex items-center gap-3 lg:gap-6">
         {/* Language Toggle */}
@@ -64,7 +64,7 @@ export default function Topbar({ onMenuClick, title = "Dashboard" }: TopbarProps
         <div className="h-8 w-px bg-gray-100 hidden sm:block mx-1"></div>
 
         {/* Profile */}
-        <div className="relative">
+        {/* <div className="relative">
           <button 
             onClick={() => setShowProfile(!showProfile)}
             className="flex items-center gap-2 lg:gap-3 p-1 rounded-full hover:bg-gray-50 transition-all"
@@ -87,7 +87,7 @@ export default function Topbar({ onMenuClick, title = "Dashboard" }: TopbarProps
               <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors font-medium">Log out</button>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </header>
   );

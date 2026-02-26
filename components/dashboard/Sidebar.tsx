@@ -26,18 +26,30 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
   const pathname = usePathname();
   const locale = useLocale();
 
+  const labelFromMessage = (key: string) => {
+    const v = t.raw(key) as unknown;
+    if (typeof v === 'string') return v;
+    if (v && typeof v === 'object') {
+      const obj = v as Record<string, unknown>;
+      const preferred = obj.label ?? obj.title ?? obj.name ?? obj.text;
+      if (typeof preferred === 'string') return preferred;
+      const firstString = Object.values(obj).find((x) => typeof x === 'string');
+      if (typeof firstString === 'string') return firstString;
+    }
+    return key;
+  };
+
   const menuItems = role === 'admin' 
     ? [
-        { icon: LayoutDashboard, label: t('admin.overview'), href: '/dashboard/admin' },
-        { icon: ShieldCheck, label: t('admin.applications'), href: '/dashboard/admin/applications' },
-        { icon: User, label: t('admin.users'), href: '/dashboard/admin/users' },
-        { icon: FileText, label: t('admin.reports'), href: '/dashboard/admin/reports' },
-        { icon: Settings, label: t('admin.settings'), href: '/dashboard/admin/settings' },
+        { icon: LayoutDashboard, label: labelFromMessage('admin.overview'), href: '/dashboard/admin' },
+        { icon: ShieldCheck, label: labelFromMessage('admin.applications'), href: '/dashboard/admin/applications' },
+        { icon: FileText, label: labelFromMessage('admin.reports'), href: '/dashboard/admin/reports' },
+        { icon: Settings, label: labelFromMessage('admin.settings'), href: '/dashboard/admin/settings' },
       ]
     : [
-        { icon: LayoutDashboard, label: t('user.myStatus'), href: '/dashboard/user' },
-        { icon: FileText, label: t('user.myCases'), href: '/dashboard/user/my-cases' },
-        { icon: Settings, label: t('user.settings'), href: '/dashboard/user/settings' },
+        { icon: LayoutDashboard, label: labelFromMessage('user.myStatus'), href: '/dashboard/user' },
+        { icon: FileText, label: labelFromMessage('user.myCases'), href: '/dashboard/user/my-cases' },
+        { icon: Settings, label: labelFromMessage('user.settings'), href: '/dashboard/user/settings' },
       ];
 
   return (

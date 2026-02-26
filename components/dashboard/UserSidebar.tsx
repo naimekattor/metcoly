@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/nextInt/navigation';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
@@ -13,19 +13,18 @@ import {
 export default function UserSidebar() {
   const t = useTranslations('dashboard.user');
   const pathname = usePathname();
-  const locale = pathname?.split('/')[1] || 'en';
 
   const navItems = [
-    { href: `/${locale}/dashboard/user`, icon: LayoutDashboard, label: t('dashboard') },
-    { href: `/${locale}/dashboard/user/my-cases`, icon: FolderOpen, label: t('myCases') },
-    { href: `/${locale}/dashboard/user/settings`, icon: Settings, label: t('settings') },
-    { href: `/${locale}/dashboard/user/logout`, icon: LogOut, label: t('logout') },
+    { href: '/dashboard/user', icon: LayoutDashboard, label: t('dashboard') },
+    { href: '/dashboard/user/my-cases', icon: FolderOpen, label: t('myCases') },
+    { href: '/dashboard/user/settings', icon: Settings, label: t('settings') },
+    { href: '/dashboard/user/logout', icon: LogOut, label: t('logout') },
   ];
 
   return (
     <aside className="w-64 bg-white border-r h-screen sticky top-0">
       <div className="p-6">
-        <Link href={`/${locale}`} className="text-2xl font-bold text-blue-600">
+        <Link href="/" className="text-2xl font-bold text-blue-600">
           Logo
         </Link>
       </div>

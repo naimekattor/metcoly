@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import {
@@ -105,7 +105,6 @@ function BrandingPanel() {
 function SignupForm() {
   const t = useTranslations('auth.signup.form');
   const pathname = usePathname();
-  const locale = pathname?.split('/')[1] || 'en';
 
   const [showPassword, setShowPassword]        = useState(false);
   const [showConfirm, setShowConfirm]          = useState(false);
@@ -256,11 +255,11 @@ function SignupForm() {
             />
             <span className="text-sm text-gray-600 leading-snug">
               {t('agreePrefix')}{' '}
-              <Link href={`/${locale}/terms`} className="text-[#1b3d6e] font-medium hover:underline">
+              <Link href="/terms" className="text-[#1b3d6e] font-medium hover:underline">
                 {t('terms')}
               </Link>{' '}
               {t('and')}{' '}
-              <Link href={`/${locale}/privacy`} className="text-[#1b3d6e] font-medium hover:underline">
+              <Link href="/privacy" className="text-[#1b3d6e] font-medium hover:underline">
                 {t('privacy')}
               </Link>
             </span>
@@ -286,7 +285,7 @@ function SignupForm() {
           {/* Sign in link */}
           <p className="text-center text-sm text-gray-500">
             {t('haveAccount')}{' '}
-            <Link href={`/${locale}/login`} className="text-[#1b3d6e] font-semibold hover:underline">
+            <Link href="/login" className="text-[#1b3d6e] font-semibold hover:underline">
               {t('signIn')}
             </Link>
           </p>

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/nextInt/navigation';
 import { usePathname } from 'next/navigation';
 import { Eye, EyeOff, MapPin, CheckCircle, Users, TrendingUp, Shield } from 'lucide-react';
 
@@ -101,7 +101,6 @@ function BrandingPanel() {
 function LoginForm() {
   const t = useTranslations('auth.login.form');
   const pathname = usePathname();
-  const locale = pathname?.split('/')[1] || 'en';
 
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -197,7 +196,7 @@ function LoginForm() {
               <span className="text-sm text-gray-600">{t('rememberMe')}</span>
             </label>
             <Link
-              href={`/${locale}/forgot-password`}
+              href="/forgot-password"
               className="text-sm text-[#1b3d6e] font-medium hover:underline"
             >
               {t('forgotPassword')}
@@ -231,7 +230,7 @@ function LoginForm() {
           {/* Sign up link */}
           <p className="text-center text-sm text-gray-500">
             {t('noAccount')}{' '}
-            <Link href={`/${locale}/signup`} className="text-[#1b3d6e] font-semibold hover:underline">
+            <Link href="/signup" className="text-[#1b3d6e] font-semibold hover:underline">
               {t('createAccount')}
             </Link>
           </p>

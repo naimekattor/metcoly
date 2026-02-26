@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
+import { Link } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import {
@@ -73,7 +73,6 @@ function StatCard({ label, value, highlight }: { label: string; value: number; h
 export default function MyCasesPage() {
   const t        = useTranslations('dashboard.cases');
   const pathname = usePathname();
-  const locale   = pathname?.split('/')[1] || 'en';
 
   const [search, setSearch]       = useState('');
   const [statusFilter, setStatus] = useState<'all' | Status>('all');
@@ -105,8 +104,8 @@ export default function MyCasesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="min-h-screen ">
+      <div className="">
 
         {/* ── Header ── */}
         <div className="flex items-start justify-between mb-8 gap-4">
@@ -115,7 +114,7 @@ export default function MyCasesPage() {
             <p className="mt-1 text-gray-500 text-sm">{t('subtitle')}</p>
           </div>
           <Link
-            href={`/${locale}/dashboard/cases/new`}
+            href="/dashboard/user/my-cases/new"
             className="inline-flex items-center gap-2 bg-[#1b3d6e] hover:bg-[#152f56] text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all duration-200 active:scale-95 shadow-sm flex-shrink-0"
           >
             <Plus size={16} /> {t('submitNew')}
@@ -224,7 +223,7 @@ export default function MyCasesPage() {
                       <td className="px-6 py-4 text-gray-600">{c.consultant}</td>
                       <td className="px-6 py-4">
                         <Link
-                          href={`/${locale}/dashboard/cases/${c.id}`}
+                          href={`/dashboard/user/my-cases/${c.id}`}
                           className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#1b3d6e] transition-colors inline-flex"
                           title={t('view')}
                         >
@@ -255,7 +254,7 @@ export default function MyCasesPage() {
                         {c.status}
                       </span>
                       <Link
-                        href={`/${locale}/dashboard/cases/${c.id}`}
+                        href={`/dashboard/user/my-cases/${c.id}`}
                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#1b3d6e] transition-colors"
                       >
                         <Eye size={16} />
