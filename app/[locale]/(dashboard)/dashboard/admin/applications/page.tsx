@@ -112,7 +112,7 @@ function DeleteModal({ caseId, onConfirm, onCancel, t }: {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function AdminCasesPage() {
-  const t      = useTranslations('admin.cases');
+  const t      = useTranslations('admin.applications');
   const locale = useLocale();
 
   const [search, setSearch]           = useState('');

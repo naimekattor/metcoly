@@ -56,7 +56,7 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
   return (
     <aside className="h-full flex flex-col bg-[#0F2A4D] text-white w-64 lg:w-72 shadow-2xl">
       {/* ── LOGO ── */}
-      <div className="p-6 border-b border-white/10">
+      <div className="p-2 border-b border-white/10">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="relative transition-transform duration-300 group-hover:scale-105">
             <Image 

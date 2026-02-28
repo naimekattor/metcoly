@@ -47,7 +47,7 @@ export default function HeroSection() {
             {t('primaryCta')} <ArrowRight size={16} />
           </Link>
           <Link
-            href="/contact"
+            href="/book"
             className="inline-flex items-center gap-2 bg-transparent border border-white/40 hover:border-white text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-all duration-200"
           >
             <Phone size={15} /> {t('secondaryCta')}
