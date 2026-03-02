@@ -15,7 +15,20 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   // Determine role based on path for this demo
-  const role = pathname.includes('/admin') ? 'admin' : 'user';
+  let role: 'user' | 'admin' | 'super_admin' = 'user';
+  if (pathname.includes('/super-admin')) {
+    role = 'super_admin';
+  } else if (pathname.includes('/admin')) {
+    role = 'admin';
+  }
+
+  const getTitle = () => {
+    switch (role) {
+      case 'super_admin': return 'Super Admin Command Center';
+      case 'admin': return 'Admin Control Center';
+      default: return 'User Dashboard';
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -52,7 +65,7 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Topbar 
           onMenuClick={() => setIsSidebarOpen(true)} 
-          title={role === 'admin' ? 'Admin Control Center' : 'User Dashboard'}
+          title={getTitle()}
         />
         <main className="flex-1 overflow-y-auto p-4 custom-scrollbar">
           <div className="h-full">
