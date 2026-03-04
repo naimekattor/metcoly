@@ -14,6 +14,7 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 // ── Mock Data ─────────────────────────────────────────────────────────────────
 
@@ -41,6 +42,7 @@ const item = {
 };
 
 export default function BookingsPage() {
+  const t = useTranslations('superAdmin.bookings');
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -61,15 +63,15 @@ export default function BookingsPage() {
       {/* ── HEADER ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Bookings Management</h1>
-          <p className="text-sm text-gray-500">View, approve, or manage all consultation bookings</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="text-sm text-gray-500">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
-            <Download size={18} /> Export
+            <Download size={18} /> {t('export')}
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-[#0F2A4D] rounded-xl text-sm font-semibold text-white hover:bg-[#1b3d6e] transition-colors shadow-lg shadow-blue-900/10">
-            <Plus size={18} /> New Booking
+            <Plus size={18} /> {t('newBooking')}
           </button>
         </div>
       </div>
@@ -93,7 +95,7 @@ export default function BookingsPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input 
             type="text" 
-            placeholder="Search by client or ID..." 
+            placeholder={t('search')} 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#0F2A4D]/10 focus:border-[#0F2A4D] transition-all"
@@ -107,12 +109,12 @@ export default function BookingsPage() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Booking Info</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Client</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Service</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Amount</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Status</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Actions</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.info')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.client')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.service')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.amount')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.status')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">

@@ -399,6 +399,300 @@
       "empty": "L'interface de gestion des utilisateurs sera ici."
     }
   },
+  "superAdmin": {
+    "navigation": {
+      "header": "Commande Super Admin",
+      "dashboard": "Tableau de bord",
+      "bookings": "Réservations",
+      "applications": "Demandes",
+      "users": {
+        "title": "Utilisateurs",
+        "all": "Tous les utilisateurs",
+        "consultants": "Consultants"
+      },
+      "analytics": {
+        "title": "Analyses",
+        "overview": "Aperçu"
+      },
+      "system": {
+        "title": "Système",
+        "services": "Gérer les services",
+        "logs": "Journaux d'activité",
+        "settings": "Paramètres"
+      }
+    },
+    "overview": {
+      "title": "Tableau de bord Super Admin",
+      "subtitle": "Aperçu et statistiques pour toute la plateforme",
+      "totalRevenue": "Revenu total",
+      "totalUsers": "Total utilisateurs",
+      "totalConsultants": "Total consultants",
+      "activeBookings": "Réservations actives",
+      "revenueGrowth": "Tendance de croissance des revenus",
+      "appBreakdown": {
+        "title": "Répartition du statut des demandes",
+        "subtitle": "Répartition actuelle des 1 255 cas au total",
+        "stats": {
+          "total": "Total",
+          "inReview": "En révision",
+          "approved": "Approuvé",
+          "rejected": "Rejeté"
+        }
+      },
+      "recentBookings": "Réservations récentes",
+      "recentApplications": "Demandes récentes",
+      "viewAll": "Voir tout"
+    },
+    "bookings": {
+      "title": "Gestion des réservations",
+      "subtitle": "Voir, approuver ou gérer toutes les réservations de consultation",
+      "export": "Exporter",
+      "newBooking": "Nouvelle réservation",
+      "search": "Rechercher par client ou ID...",
+      "table": {
+        "info": "Infos réservation",
+        "client": "Client",
+        "service": "Service",
+        "amount": "Montant",
+        "status": "Statut",
+        "actions": "Actions"
+      }
+    },
+    "applications": {
+      "title": "Gestion des demandes",
+      "management": "Gestion des demandes",
+      "subtitle": "Superviser et gérer toutes les demandes d'immigration des clients",
+      "export": "Exporter la liste",
+      "assignConsultant": "Attribuer un consultant",
+      "selectConsultant": "Sélectionner un consultant...",
+      "notAssigned": "Non attribué",
+      "actions": {
+        "title": "Actions",
+        "view": "Voir les détails",
+        "edit": "Modifier la demande",
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "delete": "Supprimer"
+      },
+      "stats": {
+        "total": "Total des dossiers",
+        "inReview": "En révision",
+        "approved": "Approuvé",
+        "rejected": "Rejeté"
+      },
+      "table": {
+        "id": "ID et Type",
+        "client": "Client",
+        "consultant": "Consultant",
+        "status": "Statut",
+        "priority": "Priorité"
+      },
+      "caseDetails": {
+        "backToCases": "Retour aux demandes",
+        "caseLabel": "Demande",
+        "priority": {
+          "high": "Haute priorité",
+          "medium": "Priorité moyenne",
+          "low": "Basse priorité"
+        },
+        "statusPill": {
+          "inProgress": "En cours"
+        },
+        "tabs": {
+          "timeline": "Chronologie",
+          "documents": "Documents",
+          "notes": "Notes"
+        },
+        "overview": {
+          "title": "Aperçu de la demande",
+          "submitted": "Date de soumission",
+          "updated": "Dernière mise à jour",
+          "type": "Type de demande",
+          "assigned": "Assigné à"
+        },
+        "clientInfo": {
+          "title": "Informations client",
+          "label": "Client",
+          "viewProfile": "Voir le profil complet"
+        },
+        "quickActions": {
+          "title": "Actions rapides",
+          "schedule": "Planifier une réunion",
+          "generate": "Générer un rapport",
+          "close": "Fermer la demande"
+        },
+        "timeline": {
+          "title": "Chronologie de la demande",
+          "subtitle": "Suivre la progression de cette demande.",
+          "steps": {
+            "submitted": "Demande soumise",
+            "review": "Révision initiale terminée",
+            "docs": "Documents demandés",
+            "awaiting": "En attente des documents du client",
+            "submit": "Soumettre la demande"
+          }
+        },
+        "documents": {
+          "title": "Documents",
+          "subtitle": "Documents de la demande et leur état",
+          "empty": "Aucun document trouvé."
+        },
+        "notes": {
+          "title": "Notes internes",
+          "subtitle": "Ajouter des notes visibles uniquement par l'équipe administrative.",
+          "placeholder": "Ajouter une nouvelle note sur cette demande...",
+          "save": "Enregistrer la note"
+        }
+      }
+    },
+    "users": {
+      "title": "Gestion des utilisateurs",
+      "subtitle": "Gérer tous les utilisateurs de la plateforme, les consultants et leurs permissions",
+      "createConsultant": "Créer un consultant",
+      "stats": {
+        "total": "Total utilisateurs",
+        "consultants": "Consultants",
+        "clients": "Clients"
+      },
+      "table": {
+        "user": "Utilisateur",
+        "contact": "Contact",
+        "role": "Rôle",
+        "joined": "Rejoint",
+        "status": "Statut"
+      }
+    },
+    "analytics": {
+      "title": "Aperçu des analyses",
+      "subtitle": "Plongée profonde dans les mesures de performance et de croissance de la plateforme",
+      "last30Days": "Les 30 derniers jours",
+      "downloadReport": "Télécharger le rapport",
+      "performance": {
+        "avgRevenue": "Revenu moyen / Utilisateur",
+        "conversionRate": "Taux de conversion",
+        "activeSessions": "Sessions actives",
+        "retentionRate": "Taux de rétention"
+      },
+      "revenueTrend": {
+        "title": "Tendance de croissance des revenus",
+        "currentPeriod": "Période actuelle"
+      },
+      "revenueByService": {
+        "title": "Revenu par service",
+        "totalCalculated": "Total calculé"
+      },
+      "geographic": {
+        "title": "Distribution géographique",
+        "activeUsers": "Utilisateurs actifs"
+      }
+    },
+    "system": {
+      "title": "Gestion du système",
+      "subtitle": "Configurer les services de la plateforme, consulter les journaux et les paramètres système",
+      "tabs": {
+        "services": "Services",
+        "logs": "Journaux d'activité",
+        "settings": "Paramètres système"
+      },
+      "services": {
+        "title": "Services de la plateforme",
+        "subtitle": "Créer et configurer les services d'immigration proposés sur la plateforme",
+        "add": "Ajouter un service",
+        "addService": "Ajouter un service",
+        "popular": "Populaire",
+        "active": "Actif",
+        "manage": "Gérer les détails",
+        "manageDetails": "Gérer les détails",
+        "baseFee": "Frais de base"
+      },
+      "logs": {
+        "title": "Chronologie de l'activité",
+        "subtitle": "Piste d'audit de toutes les actions effectuées par les utilisateurs et les événements système",
+        "download": "Télécharger le journal complet",
+        "downloadCsv": "Télécharger CSV",
+        "viewOlder": "Voir l'activité plus ancienne",
+        "loadMore": "Charger plus d'activités",
+        "searchPlaceholder": "Rechercher par utilisateur, événement ou IP...",
+        "filters": "Filtres",
+        "adminTab": "Journaux d'administration",
+        "consultantTab": "Journaux de consultant",
+        "noLogs": "Aucun journal de {role} trouvé.",
+        "loading": "Chargement des journaux..."
+      },
+      "settings": {
+        "title": "Paramètres système",
+        "subtitle": "Configurer le comportement global de la plateforme et les intégrations tierces",
+        "saveChanges": "Enregistrer toutes les modifications",
+        "branding": {
+          "title": "Image de marque",
+          "siteName": "Nom du site",
+          "siteNameDesc": "Configurer le nom public de la plateforme",
+          "appearance": "Apparence et UI",
+          "appearanceDesc": "Mode sombre, thèmes et couleurs de marque",
+          "language": "Langue par défaut",
+          "languageDesc": "Configurer la langue par défaut"
+        },
+        "security": {
+          "title": "Sécurité et Accès",
+          "auth": "Authentification",
+          "authDesc": "MFA, OAuth et politiques de mots de passe",
+          "session": "Gestion des sessions",
+          "sessionDesc": "Expiration, suivi des appareils et connexions simultanées",
+          "api": "Sécurité API",
+          "apiDesc": "Gérer les clés API et l'accès développeur"
+        },
+        "infrastructure": {
+          "title": "Infrastructure",
+          "storage": "Stockage Cloud",
+          "storageDesc": "Seaux S3 et gestion de fichiers",
+          "database": "Base de données",
+          "databaseDesc": "Sauvegardes, réplication et indexation",
+          "email": "Passerelle e-mail",
+          "emailDesc": "Paramètres SMTP et suivi de livraison"
+        },
+        "communications": {
+          "title": "Communications",
+          "templates": "Modèles d'e-mails",
+          "templatesDesc": "Image de marque et contenu des e-mails système",
+          "push": "Notifications Push",
+          "pushDesc": "Configurer les jetons push mobiles et web",
+          "chat": "Chat de support",
+          "chatDesc": "Gérer les intégrations de support en temps réel"
+        },
+        "dangerZone": {
+          "title": "Zone de danger",
+          "subtitle": "Actions irréversibles et contrôles de maintenance",
+          "maintenanceMode": "Mode maintenance"
+        },
+        "cards": {
+          "global": {
+            "title": "Paramètres globaux",
+            "desc": "Mode maintenance, nom du site, logo"
+          },
+          "auth": {
+            "title": "Authentification",
+            "desc": "MFA, OAuth, expiration de session"
+          },
+          "cloud": {
+            "title": "Stockage Cloud",
+            "desc": "S3, Azure, sauvegarde Google Cloud"
+          },
+          "email": {
+            "title": "Modèles d'e-mails",
+            "desc": "Marque d'e-mail, configuration SMTP"
+          },
+          "notifications": {
+            "title": "Notifications",
+            "desc": "Alertes système, paramètres Push"
+          },
+          "maintenance": {
+            "title": "Maintenance",
+            "desc": "Optimisation de la base de données, nettoyage"
+          }
+        }
+      }
+    }
+  },
   "landing": {
     "hero": {
       "badge": "Certifié et titulaire d'un permis du CCIC",

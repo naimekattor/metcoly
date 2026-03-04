@@ -16,7 +16,9 @@ import {
   Filter,
   Search
 } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 // ── Mock Data ─────────────────────────────────────────────────────────────────
 
@@ -78,6 +80,7 @@ const item = {
 };
 
 export default function SuperAdminDashboard() {
+  const t = useTranslations('superAdmin.overview');
   const [bookingFilter, setBookingFilter] = useState('All');
 
   const filteredBookings = bookingFilter === 'All' 
@@ -85,6 +88,13 @@ export default function SuperAdminDashboard() {
     : RECENT_BOOKINGS.filter(b => b.status === bookingFilter);
 
   const maxRevenue = Math.max(...REVENUE_DATA.map(d => d.value));
+
+  const stats = [
+    { label: t('totalRevenue'), value: '$128,430', change: '+12.5%', icon: DollarSign, trend: 'up' },
+    { label: t('totalUsers'), value: '2,845', change: '+8.2%', icon: Users, trend: 'up' },
+    { label: t('totalConsultants'), value: '42', change: '+4.1%', icon: UserCheck, trend: 'up' },
+    { label: t('activeBookings'), value: '156', change: '-2.4%', icon: Calendar, trend: 'down' },
+  ];
 
   return (
     <motion.div 
@@ -95,7 +105,7 @@ export default function SuperAdminDashboard() {
     >
       {/* ── STAT CARDS ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {STATS.map((stat, idx) => (
+        {stats.map((stat, idx) => (
           <motion.div 
             key={idx}
             variants={item}
@@ -105,18 +115,16 @@ export default function SuperAdminDashboard() {
               <div className="p-3 rounded-xl bg-[#0F2A4D]/5 text-[#0F2A4D]">
                 <stat.icon size={22} />
               </div>
-              <div className={`flex items-center gap-0.5 text-xs font-bold ${stat.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
+              {/* <div className={`flex items-center gap-0.5 text-xs font-bold ${stat.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
                 {stat.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
                 {stat.change}
-              </div>
+              </div> */}
             </div>
             <div>
               <p className="text-sm font-medium text-gray-400">{stat.label}</p>
               <h3 className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</h3>
             </div>
-            <div className="absolute -bottom-2 -right-2 opacity-5 group-hover:opacity-10 transition-opacity">
-              <stat.icon size={80} />
-            </div>
+            
           </motion.div>
         ))}
       </div>
@@ -126,7 +134,7 @@ export default function SuperAdminDashboard() {
         <motion.div variants={item} className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-lg font-bold text-gray-900">Monthly Revenue</h3>
+              <h3 className="text-lg font-bold text-gray-900">{t('revenueGrowth')}</h3>
               <p className="text-sm text-gray-400">Total revenue increase of 12% from last month</p>
             </div>
             <select className="text-xs bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 outline-none">
@@ -162,11 +170,15 @@ export default function SuperAdminDashboard() {
 
         {/* ── APPLICATION BREAKDOWN ── */}
         <motion.div variants={item} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Application Status</h3>
-          <p className="text-sm text-gray-400 mb-8">Current distribution of 1,255 total cases</p>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">{t('appBreakdown.title')}</h3>
+          <p className="text-sm text-gray-400 mb-8">{t('appBreakdown.subtitle')}</p>
           
           <div className="space-y-6">
-            {APPLICATION_STATUS.map((status, idx) => (
+            {[
+              { label: t('appBreakdown.stats.approved'), count: 845, percentage: 65, color: '#10b981' },
+              { label: t('appBreakdown.stats.inReview'), count: 184, percentage: 15, color: '#3b82f6' },
+              { label: t('appBreakdown.stats.rejected'), count: 104, percentage: 10, color: '#ef4444' },
+            ].map((status, idx) => (
               <div key={idx} className="space-y-2">
                 <div className="flex justify-between items-end">
                   <span className="text-sm font-bold text-gray-700">{status.label}</span>
@@ -191,7 +203,7 @@ export default function SuperAdminDashboard() {
               <span className="text-xs text-gray-500 font-medium">85% Approval Rate</span>
             </div>
             <Link href="/dashboard/super-admin/applications" className="text-xs text-[#c9a84c] font-bold hover:underline">
-              View Detailed Report
+              {t('viewAll')}
             </Link>
           </div>
         </motion.div>
@@ -201,7 +213,7 @@ export default function SuperAdminDashboard() {
         {/* ── RECENT BOOKINGS TABLE ── */}
         <motion.div variants={item} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-6 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="text-lg font-bold text-gray-900">Recent Bookings</h3>
+            <h3 className="text-lg font-bold text-gray-900">{t('recentBookings')}</h3>
             <div className="flex bg-gray-100 p-1 rounded-xl">
               {['All', 'Pending', 'Approved', 'Completed'].map((tab) => (
                 <button
@@ -252,7 +264,7 @@ export default function SuperAdminDashboard() {
           </div>
           <div className="p-4 border-t border-gray-50 text-center">
             <button className="text-xs font-bold text-[#0F2A4D] hover:underline flex items-center justify-center gap-1 mx-auto">
-              View All Bookings <ChevronRight size={14} />
+              {t('viewAll')} <ChevronRight size={14} />
             </button>
           </div>
         </motion.div>
@@ -260,7 +272,7 @@ export default function SuperAdminDashboard() {
         {/* ── RECENT APPLICATIONS TABLE ── */}
         <motion.div variants={item} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-6 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h3 className="text-lg font-bold text-gray-900">Recent Applications</h3>
+            <h3 className="text-lg font-bold text-gray-900">{t('recentApplications')}</h3>
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
               <input 
@@ -311,7 +323,7 @@ export default function SuperAdminDashboard() {
           </div>
           <div className="p-4 border-t border-gray-50 text-center">
             <button className="text-xs font-bold text-[#0F2A4D] hover:underline flex items-center justify-center gap-1 mx-auto">
-              View All Applications <ChevronRight size={14} />
+              {t('viewAll')} <ChevronRight size={14} />
             </button>
           </div>
         </motion.div>

@@ -399,6 +399,300 @@
       "empty": "User management interface will go here."
     }
   },
+  "superAdmin": {
+    "navigation": {
+      "header": "Super Admin Command",
+      "dashboard": "Dashboard",
+      "bookings": "Bookings",
+      "applications": "Applications",
+      "users": {
+        "title": "Users",
+        "all": "All Users",
+        "consultants": "Consultants"
+      },
+      "analytics": {
+        "title": "Analytics",
+        "overview": "Overview"
+      },
+      "system": {
+        "title": "System",
+        "services": "Manage Services",
+        "logs": "Activity Logs",
+        "settings": "Settings"
+      }
+    },
+    "overview": {
+      "title": "Super Admin Dashboard",
+      "subtitle": "Overview and statistics for the entire platform",
+      "totalRevenue": "Total Revenue",
+      "totalUsers": "Total Users",
+      "totalConsultants": "Total Consultants",
+      "activeBookings": "Active Bookings",
+      "revenueGrowth": "Revenue Growth Trend",
+      "appBreakdown": {
+        "title": "Application Status Breakdown",
+        "subtitle": "Current distribution of 1,255 total cases",
+        "stats": {
+          "total": "Total Cases",
+          "inReview": "In Review",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        }
+      },
+      "recentBookings": "Recent Bookings",
+      "recentApplications": "Recent Applications",
+      "viewAll": "View All"
+    },
+    "bookings": {
+      "title": "Bookings Management",
+      "subtitle": "View, approve, or manage all consultation bookings",
+      "export": "Export",
+      "newBooking": "New Booking",
+      "search": "Search by client or ID...",
+      "table": {
+        "info": "Booking Info",
+        "client": "Client",
+        "service": "Service",
+        "amount": "Amount",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "applications": {
+      "title": "Application Management",
+      "management": "Applications Management",
+      "subtitle": "Oversee and manage all client immigration applications",
+      "export": "Export List",
+      "assignConsultant": "Assign Consultant",
+      "selectConsultant": "Select Consultant...",
+      "notAssigned": "Not Assigned",
+      "actions": {
+        "title": "Actions",
+        "view": "View Details",
+        "edit": "Edit Application",
+        "approve": "Approve",
+        "reject": "Reject",
+        "delete": "Delete"
+      },
+      "stats": {
+        "total": "Total Cases",
+        "inReview": "In Review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "table": {
+        "id": "ID & Type",
+        "client": "Client",
+        "consultant": "Consultant",
+        "status": "Status",
+        "priority": "Priority"
+      },
+      "caseDetails": {
+        "backToCases": "Back to Applications",
+        "caseLabel": "Application",
+        "priority": {
+          "high": "High Priority",
+          "medium": "Medium Priority",
+          "low": "Low Priority"
+        },
+        "statusPill": {
+          "inProgress": "In Progress"
+        },
+        "tabs": {
+          "timeline": "Timeline",
+          "documents": "Documents",
+          "notes": "Notes"
+        },
+        "overview": {
+          "title": "Application Overview",
+          "submitted": "Submitted Date",
+          "updated": "Last Updated",
+          "type": "Application Type",
+          "assigned": "Assigned To"
+        },
+        "clientInfo": {
+          "title": "Client Information",
+          "label": "Client",
+          "viewProfile": "View Full Profile"
+        },
+        "quickActions": {
+          "title": "Quick Actions",
+          "schedule": "Schedule Meeting",
+          "generate": "Generate Report",
+          "close": "Close Application"
+        },
+        "timeline": {
+          "title": "Application Timeline",
+          "subtitle": "Track the progress of this application.",
+          "steps": {
+            "submitted": "Application submitted",
+            "review": "Initial review completed",
+            "docs": "Documents requested",
+            "awaiting": "Awaiting client documents",
+            "submit": "Submit application"
+          }
+        },
+        "documents": {
+          "title": "Documents",
+          "subtitle": "Application documents and their status",
+          "empty": "No documents found."
+        },
+        "notes": {
+          "title": "Internal Notes",
+          "subtitle": "Add notes visible only to the admin team.",
+          "placeholder": "Add a new note about this application...",
+          "save": "Save Note"
+        }
+      }
+    },
+    "users": {
+      "title": "User Management",
+      "subtitle": "Manage all platform users, consultants and their permissions",
+      "createConsultant": "Create Consultant",
+      "stats": {
+        "total": "Total Users",
+        "consultants": "Consultants",
+        "clients": "Clients"
+      },
+      "table": {
+        "user": "User",
+        "contact": "Contact",
+        "role": "Role",
+        "joined": "Joined",
+        "status": "Status"
+      }
+    },
+    "analytics": {
+      "title": "Analytics Overview",
+      "subtitle": "Deep dive into platform performance and growth metrics",
+      "last30Days": "Last 30 Days",
+      "downloadReport": "Download Report",
+      "performance": {
+        "avgRevenue": "Avg. Revenue / User",
+        "conversionRate": "Conversion Rate",
+        "activeSessions": "Active Sessions",
+        "retentionRate": "Retention Rate"
+      },
+      "revenueTrend": {
+        "title": "Revenue Growth Trend",
+        "currentPeriod": "Current Period"
+      },
+      "revenueByService": {
+        "title": "Revenue by Service",
+        "totalCalculated": "Total Calculated"
+      },
+      "geographic": {
+        "title": "Geographic Distribution",
+        "activeUsers": "Active Users"
+      }
+    },
+    "system": {
+      "title": "System Management",
+      "subtitle": "Configure platform services, view logs, and system settings",
+      "tabs": {
+        "services": "Services",
+        "logs": "Activity Logs",
+        "settings": "System Settings"
+      },
+      "services": {
+        "title": "Platform Services",
+        "subtitle": "Create and configure the immigration services offered on the platform",
+        "add": "Add Service",
+        "addService": "Add Service",
+        "popular": "Popular",
+        "active": "Active",
+        "manage": "Manage Details",
+        "manageDetails": "Manage Details",
+        "baseFee": "Base Fee"
+      },
+      "logs": {
+        "title": "Activity Timeline",
+        "subtitle": "Audit trail of all actions performed by users and system events",
+        "download": "Download Full Log",
+        "downloadCsv": "Download CSV",
+        "viewOlder": "View Older Activity",
+        "loadMore": "Load More Activity",
+        "searchPlaceholder": "Search by user, event, or IP...",
+        "filters": "Filters",
+        "adminTab": "Admin Logs",
+        "consultantTab": "Consultant Logs",
+        "noLogs": "No {role} logs found.",
+        "loading": "Loading logs..."
+      },
+      "settings": {
+        "title": "System Settings",
+        "subtitle": "Configure global platform behavior and third-party integrations",
+        "saveChanges": "Save All Changes",
+        "branding": {
+          "title": "Platform Branding",
+          "siteName": "Site Name",
+          "siteNameDesc": "Configure platform public name",
+          "appearance": "Appearance & UI",
+          "appearanceDesc": "Dark mode, themes, and branding colors",
+          "language": "Default Language",
+          "languageDesc": "Configure default platform locale"
+        },
+        "security": {
+          "title": "Security & Access",
+          "auth": "Authentication",
+          "authDesc": "MFA, OAuth, and password policies",
+          "session": "Session Management",
+          "sessionDesc": "Timeout, device tracking, and concurrent logins",
+          "api": "API Security",
+          "apiDesc": "Manage API keys and developer access"
+        },
+        "infrastructure": {
+          "title": "Infrastructure",
+          "storage": "Cloud Storage",
+          "storageDesc": "S3 buckets and file management",
+          "database": "Database",
+          "databaseDesc": "Backups, replication, and indexing",
+          "email": "Email Gateway",
+          "emailDesc": "SMTP settings and delivery tracking"
+        },
+        "communications": {
+          "title": "Communications",
+          "templates": "Email Templates",
+          "templatesDesc": "Branding and content for system emails",
+          "push": "Push Notifications",
+          "pushDesc": "Configure mobile and web push tokens",
+          "chat": "Support Chat",
+          "chatDesc": "Manage real-time support integrations"
+        },
+        "dangerZone": {
+          "title": "Danger Zone",
+          "subtitle": "Irreversible actions and maintenance controls",
+          "maintenanceMode": "Maintenance Mode"
+        },
+        "cards": {
+          "global": {
+            "title": "Global Settings",
+            "desc": "Maintenance mode, site name, logo"
+          },
+          "auth": {
+            "title": "Authentication",
+            "desc": "MFA, OAuth, Session timeout"
+          },
+          "cloud": {
+            "title": "Cloud Storage",
+            "desc": "S3, Azure, Google Cloud backup"
+          },
+          "email": {
+            "title": "Email Templates",
+            "desc": "Email branding, SMTP config"
+          },
+          "notifications": {
+            "title": "Notifications",
+            "desc": "System alerts, Push settings"
+          },
+          "maintenance": {
+            "title": "Maintenance",
+            "desc": "Database optimization, cleaning"
+          }
+        }
+      }
+    }
+  },
   "landing": {
     "hero": {
       "badge": "ICCRC Licensed & Certified",

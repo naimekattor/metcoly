@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Cpu, 
   Activity, 
@@ -16,9 +16,11 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Mail
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 // ── Mock Data ─────────────────────────────────────────────────────────────────
 
@@ -51,7 +53,8 @@ const item = {
 };
 
 export default function SystemPage() {
-  const [activeTab, setActiveTab] = useState('Services');
+  const t = useTranslations('superAdmin.system');
+  const [activeTab, setActiveTab] = useState<'services' | 'logs' | 'settings'>('services');
 
   return (
     <motion.div 
@@ -63,14 +66,14 @@ export default function SystemPage() {
       {/* ── HEADER ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">System Management</h1>
-          <p className="text-sm text-gray-500">Configure platform services, view logs, and system settings</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="text-sm text-gray-500">{t('subtitle')}</p>
         </div>
       </div>
 
       {/* ── TABS ── */}
       <div className="flex border-b border-gray-100 gap-8">
-        {['Services', 'Activity Logs', 'System Settings'].map((tab) => (
+        {(['services', 'logs', 'settings'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -78,7 +81,7 @@ export default function SystemPage() {
               activeTab === tab ? 'text-[#0F2A4D]' : 'text-gray-400 hover:text-gray-600'
             }`}
           >
-            {tab}
+            {t(`tabs.${tab}`)}
             {activeTab === tab && (
               <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0F2A4D]" />
             )}
@@ -87,15 +90,16 @@ export default function SystemPage() {
       </div>
 
       <AnimatePresence mode="wait">
-        {activeTab === 'Services' && <ServicesTab key="services" item={item} />}
-        {activeTab === 'Activity Logs' && <LogsTab key="logs" item={item} />}
-        {activeTab === 'System Settings' && <SettingsTab key="settings" item={item} />}
+        {activeTab === 'services' && <ServicesTab key="services" item={item} />}
+        {activeTab === 'logs' && <LogsTab key="logs" item={item} />}
+        {activeTab === 'settings' && <SettingsTab key="settings" item={item} />}
       </AnimatePresence>
     </motion.div>
   );
 }
 
 function ServicesTab({ item }: any) {
+  const t = useTranslations('superAdmin.system.services');
   return (
     <motion.div 
       variants={item}
@@ -105,9 +109,9 @@ function ServicesTab({ item }: any) {
       className="space-y-6"
     >
       <div className="flex justify-between items-center">
-        <h3 className="font-bold text-gray-900">Platform Services</h3>
+        <h3 className="font-bold text-gray-900">{t('title')}</h3>
         <button className="flex items-center gap-2 px-4 py-2 bg-[#0F2A4D] rounded-xl text-sm font-semibold text-white hover:bg-[#1b3d6e] transition-colors shadow-lg">
-          <Plus size={18} /> Add Service
+          <Plus size={18} /> {t('add')}
         </button>
       </div>
 
@@ -120,9 +124,9 @@ function ServicesTab({ item }: any) {
               </div>
               <div className="flex items-center gap-2">
                 {service.popular && (
-                  <span className="text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-0.5 rounded uppercase">Popular</span>
+                  <span className="text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-0.5 rounded uppercase">{t('popular')}</span>
                 )}
-                <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded uppercase">{service.status}</span>
+                <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded uppercase">{service.status === 'Active' ? t('active') : service.status}</span>
               </div>
             </div>
             <h4 className="font-bold text-gray-900">{service.name}</h4>
@@ -131,7 +135,7 @@ function ServicesTab({ item }: any) {
             <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
               <span className="text-lg font-black text-[#0F2A4D]">{service.price}</span>
               <button className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 group/btn">
-                Manage Details <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+                {t('manage')} <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
@@ -142,6 +146,7 @@ function ServicesTab({ item }: any) {
 }
 
 function LogsTab({ item }: any) {
+  const t = useTranslations('superAdmin.system.logs');
   return (
     <motion.div 
       variants={item}
@@ -151,8 +156,8 @@ function LogsTab({ item }: any) {
       className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
     >
       <div className="p-6 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-        <h3 className="font-bold text-gray-900">Activity Timeline</h3>
-        <button className="text-xs font-bold text-gray-400 hover:text-gray-600">Download Full Log</button>
+        <h3 className="font-bold text-gray-900">{t('title')}</h3>
+        <button className="text-xs font-bold text-gray-400 hover:text-gray-600">{t('download')}</button>
       </div>
       <div className="divide-y divide-gray-50">
         {RECENT_LOGS.map((log) => (
@@ -179,13 +184,23 @@ function LogsTab({ item }: any) {
         ))}
       </div>
       <div className="p-4 text-center bg-gray-50/50 border-t border-gray-50">
-        <button className="text-xs font-bold text-blue-600 hover:underline">View Older Activity</button>
+        <button className="text-xs font-bold text-blue-600 hover:underline">{t('viewOlder')}</button>
       </div>
     </motion.div>
   );
 }
 
 function SettingsTab({ item }: any) {
+  const t = useTranslations('superAdmin.system.settings');
+  const configs = [
+    { key: 'global', icon: Layout },
+    { key: 'auth', icon: Lock },
+    { key: 'cloud', icon: Cloud },
+    { key: 'email', icon: Mail },
+    { key: 'notifications', icon: Bell },
+    { key: 'maintenance', icon: Activity },
+  ] as const;
+
   return (
     <motion.div 
       variants={item}
@@ -194,26 +209,17 @@ function SettingsTab({ item }: any) {
       exit={{ opacity: 0, y: -10 }}
       className="grid grid-cols-1 md:grid-cols-3 gap-6"
     >
-      {[
-        { title: 'Global Settings', desc: 'Maintenance mode, site name, logo', icon: Layout },
-        { title: 'Authentication', desc: 'MFA, OAuth, Session timeout', icon: Lock },
-        { title: 'Cloud Strorage', desc: 'S3, Azure, Google Cloud backup', icon: Cloud },
-        { title: 'Email Templates', desc: 'Email branding, SMTP config', icon: Mail },
-        { title: 'Notifications', desc: 'System alerts, Push settings', icon: Bell },
-        { title: 'Maintenance', desc: 'Database optimization, cleaning', icon: Activity },
-      ].map((config, idx) => (
+      {configs.map((config, idx) => (
         <div key={idx} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col gap-4">
           <div className="p-3 rounded-xl bg-blue-50 text-blue-600 w-fit">
             <config.icon size={20} />
           </div>
           <div>
-            <h4 className="font-bold text-gray-900">{config.title}</h4>
-            <p className="text-xs text-gray-400 mt-1">{config.desc}</p>
+            <h4 className="font-bold text-gray-900">{t(`cards.${config.key}.title`)}</h4>
+            <p className="text-xs text-gray-400 mt-1">{t(`cards.${config.key}.desc`)}</p>
           </div>
         </div>
       ))}
     </motion.div>
   );
 }
-
-import { AnimatePresence } from 'framer-motion';

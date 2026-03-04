@@ -32,6 +32,7 @@ interface SidebarProps {
 export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
   const t = useTranslations('dashboard.navigation');
   const t_admin = useTranslations('admin');
+  const t_super = useTranslations('superAdmin');
   const pathname = usePathname();
   const locale = useLocale();
 
@@ -65,53 +66,52 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
     ? [
         { icon: LayoutDashboard, label: t_admin('overview.title'), href: '/dashboard/admin' },
         { icon: ShieldCheck, label: t_admin('applications.title'), href: '/dashboard/admin/applications' },
-        { icon: FileText, label: t_admin('reports.title'), href: '/dashboard/admin/reports' },
         { icon: Settings, label: t_admin('settings.title'), href: '/dashboard/admin/settings' },
       ]
     : role === 'super_admin'
     ? [
-        { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/super-admin' },
+        { icon: LayoutDashboard, label: t_super('navigation.dashboard'), href: '/dashboard/super-admin' },
         {
           id: 'bookings',
           icon: Calendar,
-          label: 'Bookings',
+          label: t_super('navigation.bookings'),
           links: [
-            { label: 'All Bookings', href: '/dashboard/super-admin/bookings' }
+            { label: t_super('bookings.title'), href: '/dashboard/super-admin/bookings' }
           ]
         },
         {
           id: 'applications',
           icon: ShieldCheck,
-          label: 'Applications',
+          label: t_super('navigation.applications'),
           links: [
-            { label: 'View All', href: '/dashboard/super-admin/applications' }
+            { label: t_super('applications.management'), href: '/dashboard/super-admin/applications' }
           ]
         },
         {
           id: 'users',
           icon: UsersIcon,
-          label: 'Users',
+          label: t_super('navigation.users.title'),
           links: [
-            { label: 'All Users', href: '/dashboard/super-admin/users' },
-            { label: 'Consultants', href: '/dashboard/super-admin/users?role=CONSULTANT' }
+            { label: t_super('navigation.users.all'), href: '/dashboard/super-admin/users' },
+            // { label: t_super('navigation.users.consultants'), href: '/dashboard/super-admin/users?role=CONSULTANT' }
           ]
         },
         {
           id: 'analytics',
           icon: BarChart2,
-          label: 'Analytics',
+          label: t_super('navigation.analytics.title'),
           links: [
-            { label: 'Overview', href: '/dashboard/super-admin/analytics' }
+            { label: t_super('navigation.analytics.overview'), href: '/dashboard/super-admin/analytics' }
           ]
         },
         {
           id: 'system',
           icon: Cpu,
-          label: 'System',
+          label: t_super('navigation.system.title'),
           links: [
-            { icon: Briefcase, label: 'Manage Services', href: '/dashboard/super-admin/services' },
-            { icon: Activity, label: 'Activity Logs', href: '/dashboard/super-admin/logs' },
-            { icon: Settings, label: 'Settings', href: '/dashboard/super-admin/settings' }
+            { icon: Briefcase, label: t_super('navigation.system.services'), href: '/dashboard/super-admin/services' },
+            { icon: Activity, label: t_super('navigation.system.logs'), href: '/dashboard/super-admin/logs' },
+            // { icon: Settings, label: t_super('navigation.system.settings'), href: '/dashboard/super-admin/settings' }
           ]
         }
       ]
@@ -124,7 +124,7 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
   return (
     <aside className="h-full flex flex-col bg-[#0F2A4D] text-white w-64 lg:w-72 shadow-2xl overflow-hidden">
       {/* ── LOGO ── */}
-      <div className="p-4 border-b border-white/10 flex justify-center">
+      <div className="p-2 border-b border-white/10 flex justify-center">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="relative transition-transform duration-300 group-hover:scale-105">
             <Image 
@@ -142,7 +142,7 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
       {/* ── NAVIGATION ── */}
       <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2 custom-scrollbar no-scrollbar">
         <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] px-3 mb-4">
-          {role === 'super_admin' ? 'Super Admin Command' : role === 'admin' ? 'Admin Control' : 'General Menu'}
+          {role === 'super_admin' ? t_super('navigation.header') : role === 'admin' ? t_admin('overview.title') : t('header')}
         </div>
         
         {menuItems.map((item: any) => {
@@ -233,19 +233,19 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
 
       {/* ── FOOTER ACTIONS ── */}
       <div className="p-4 border-t border-white/10 space-y-2">
-        <Link 
+        {/* <Link 
           href="/support"
           className="flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white hover:bg-white/5 rounded-xl transition-all"
         >
           <HelpCircle size={20} />
-          <span className="text-sm font-medium">Support</span>
-        </Link>
+          <span className="text-sm font-medium">{t('admin.reports') || 'Support'}</span>
+        </Link> */}
         <Link 
           href="/dashboard/user/logout"
           className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl transition-all mt-2"
         >
           <LogOut size={20} />
-          <span className="text-sm font-medium">Logout</span>
+          <span className="text-sm font-medium">{useTranslations('navigation')('logout')}</span>
         </Link>
       </div>
     </aside>

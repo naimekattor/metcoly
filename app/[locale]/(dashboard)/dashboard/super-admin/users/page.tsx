@@ -16,6 +16,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 // ── Mock Data ─────────────────────────────────────────────────────────────────
 
@@ -42,6 +43,7 @@ const item = {
 };
 
 export default function UsersPage() {
+  const t = useTranslations('superAdmin.users');
   const [activeTab, setActiveTab] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -64,15 +66,15 @@ export default function UsersPage() {
       {/* ── HEADER ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-          <p className="text-sm text-gray-500">Manage all platform users, consultants and their permissions</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="text-sm text-gray-500">{t('subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
-            <Download size={18} /> Export
+            <Download size={18} /> {useTranslations('superAdmin.bookings')('export')}
           </button>
           <button className="flex items-center gap-2 px-4 py-2 bg-[#0F2A4D] rounded-xl text-sm font-semibold text-white hover:bg-[#1b3d6e] transition-colors shadow-lg">
-            <UserPlus size={18} /> Create Consultant
+            <UserPlus size={18} /> {t('createConsultant')}
           </button>
         </div>
       </div>
@@ -80,9 +82,9 @@ export default function UsersPage() {
       {/* ── STATS OVERVIEW ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {[
-          { label: 'Total Users', value: USERS.length, icon: UsersIcon, color: 'blue' },
-          { label: 'Consultants', value: USERS.filter(u => u.role === 'CONSULTANT').length, icon: ShieldCheck, color: 'emerald' },
-          { label: 'Clients', value: USERS.filter(u => u.role === 'CLIENT').length, icon: UsersIcon, color: 'amber' },
+          { label: t('stats.total'), value: USERS.length, icon: UsersIcon, color: 'blue' },
+          { label: t('stats.consultants'), value: USERS.filter(u => u.role === 'CONSULTANT').length, icon: ShieldCheck, color: 'emerald' },
+          { label: t('stats.clients'), value: USERS.filter(u => u.role === 'CLIENT').length, icon: UsersIcon, color: 'amber' },
         ].map((stat, idx) => (
           <motion.div key={idx} variants={item} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div className={`p-3 rounded-xl bg-${stat.color}-50 text-${stat.color}-600`}>
@@ -129,11 +131,11 @@ export default function UsersPage() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">User</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Contact</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Role</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Joined</th>
-                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">Status</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.user')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.contact')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.role')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.joined')}</th>
+                <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4">{t('table.status')}</th>
                 <th className="text-left text-[11px] font-bold text-gray-400 uppercase tracking-wider px-6 py-4"></th>
               </tr>
             </thead>
@@ -180,11 +182,8 @@ export default function UsersPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-[#0F2A4D]" title="Edit Account">
-                        <Edit2 size={16} />
-                      </button>
-                      <button className="p-2 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600" title="Deactivate">
+                    <div className="flex items-center justify-end gap-1  group-hover:opacity-100 transition-opacity">
+                      <button className="p-2 bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600" title="Deactivate">
                         <ShieldAlert size={16} />
                       </button>
                     </div>
