@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
+import { applicationsAPI } from '@/lib/api/applications';
+import { useAuthStore } from '@/store/authStore';
 import {
   FileText,
   AlertCircle,
@@ -13,13 +15,17 @@ import {
   Plus,
   Clock,
   Activity,
+  Loader2,
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
+type Status   = 'In Progress' | 'Under Review' | 'Completed' | 'Pending Documents' | 'Submitted' | 'Approved' | 'Rejected' | 'Pending' | string;
+
 type Case = {
   id: string;
   type: string;
-  status: 'Submitted' | 'In Review' | 'Approved' | 'Pending';
+  status: Status;
   submittedDate: string;
   timeAgo: string;
 };
@@ -30,25 +36,30 @@ type ActivityItem = {
   time: string;
 };
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
-const MOCK_CASES: Case[] = [
-  {
-    id: 'CASE-2026-006',
-    type: 'Work Permit',
-    status: 'Submitted',
-    submittedDate: 'February 22, 2026',
-    timeAgo: 'Just now',
-  },
-];
-
-const MOCK_ACTIVITY: ActivityItem[] = [];
-
-const STATUS_STYLES: Record<Case['status'], string> = {
+const STATUS_STYLES: Record<string, string> = {
   Submitted: 'bg-blue-100 text-blue-700',
   'In Review': 'bg-yellow-100 text-yellow-700',
   Approved:   'bg-green-100 text-green-700',
+  Rejected:   'bg-red-100 text-red-700',
   Pending:    'bg-gray-100 text-gray-600',
+  'Pending Documents': 'bg-orange-100 text-orange-700',
 };
+
+// Helper for formatting relative time
+function timeSince(date: Date) {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " minutes ago";
+  return "Just now";
+}
 
 // ── Stat Card ─────────────────────────────────────────────────────────────────
 function StatCard({
@@ -77,13 +88,63 @@ function StatCard({
 export default function DashboardPage() {
   const t = useTranslations('dashboard');
   const pathname = usePathname();
+  const { user } = useAuthStore();
+  
+  const [cases, setCases] = useState<Case[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Stats derived from actual cases
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const res = await applicationsAPI.getMyApplications();
+      
+      // Map API response to our UI type
+      // Check the exact structure your API returns. Here we expect an array in res.data or res
+      const applications = Array.isArray(res.data?.applications) 
+        ? res.data.applications 
+        : (Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []));
+      
+      const mappedCases = applications.map((app: any) => {
+        const date = new Date(app.createdAt || new Date());
+        return {
+          id: app.applicationId || app.id || 'N/A',
+          type: app.service?.name || app.type || 'General Application',
+          status: app.status || 'Submitted',
+          submittedDate: date.toLocaleDateString(),
+          timeAgo: timeSince(date),
+        };
+      });
+      
+      setCases(mappedCases);
+    } catch (err: any) {
+      console.error('Failed to load cases:', err);
+      toast.error('Failed to load your applications.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const activeCases = cases.filter(c => c.status !== 'Completed' && c.status !== 'Approved' && c.status !== 'Rejected').length;
+  // Pending actions could be defined by "Pending Documents" or similar status
+  const pendingActions = cases.filter(c => c.status === 'Pending Documents' || c.status === 'docsRequired').length;
+  const completedCases = cases.filter(c => c.status === 'Completed' || c.status === 'Approved').length;
 
   const stats = [
-    { label: t('stats.activeCases'),     value: 1,   icon: FileText,    iconColor: 'text-gray-400'   },
-    { label: t('stats.pendingActions'),  value: 0,   icon: AlertCircle, iconColor: 'text-yellow-500' },
-    { label: t('stats.completed'),       value: 0,   icon: CheckCircle2,iconColor: 'text-green-500'  },
-    { label: t('stats.totalSpent'),      value: '$0',icon: CreditCard,  iconColor: 'text-gray-400'   },
+    { label: t('stats.activeCases'),     value: activeCases,   icon: FileText,    iconColor: 'text-gray-400'   },
+    { label: t('stats.pendingActions'),  value: pendingActions,   icon: AlertCircle, iconColor: 'text-yellow-500' },
+    { label: t('stats.completed'),       value: completedCases,   icon: CheckCircle2,iconColor: 'text-green-500'  },
+    { label: t('stats.totalSpent'),      value: '$0',icon: CreditCard,  iconColor: 'text-gray-400'   }, // To be updated if billing is added
   ];
+  
+  // Sort by newest for Recent Cases
+  const recentCases = [...cases].slice(0, 5);
+
+  const MOCK_ACTIVITY: ActivityItem[] = [];
 
   return (
     <div className="min-h-screen ">
@@ -93,7 +154,7 @@ export default function DashboardPage() {
         <div className="flex items-start justify-between mb-8 gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              {t('welcome')}, <span className="text-[#1b3d6e]">John</span>
+              {t('welcome')}, <span className="text-[#1b3d6e]">{user?.firstName || 'User'}</span>
             </h1>
             <p className="mt-1 text-gray-500 text-sm">{t('subtitle')}</p>
           </div>
@@ -116,9 +177,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Recent Cases — takes 2/3 */}
-          <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div className="flex flex-shrink-0 items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-900 text-base">{t('recentCases.title')}</h2>
               <Link
                 href="/dashboard/user/my-cases"
@@ -129,13 +190,17 @@ export default function DashboardPage() {
             </div>
 
             {/* Cases list */}
-            <div className="divide-y divide-gray-50">
-              {MOCK_CASES.length === 0 ? (
+            <div className="divide-y divide-gray-50 flex-1 overflow-y-auto">
+              {loading ? (
+                <div className="flex items-center justify-center p-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-[#1b3d6e]" />
+                </div>
+              ) : recentCases.length === 0 ? (
                 <div className="px-6 py-12 text-center text-gray-400 text-sm">
                   {t('recentCases.empty')}
                 </div>
               ) : (
-                MOCK_CASES.map((c) => (
+                recentCases.map((c) => (
                   <Link
                     key={c.id}
                     href={`/dashboard/user/my-cases/${c.id}`}
@@ -151,7 +216,7 @@ export default function DashboardPage() {
                         <span>{c.timeAgo}</span>
                       </div>
                     </div>
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full flex-shrink-0 ${STATUS_STYLES[c.status]}`}>
+                    <span className={`text-xs font-semibold px-3 py-1 rounded-full flex-shrink-0 ${STATUS_STYLES[c.status] || 'bg-gray-100 text-gray-600'}`}>
                       {c.status}
                     </span>
                   </Link>
@@ -161,15 +226,15 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Activity — takes 1/3 */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col h-full">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-100">
+            <div className="flex-shrink-0 px-6 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-900 text-base">{t('activity.title')}</h2>
               <p className="text-gray-400 text-xs mt-0.5">{t('activity.subtitle')}</p>
             </div>
 
             {/* Activity list */}
-            <div className="px-6 py-4">
+            <div className="px-6 py-4 flex-1 overflow-y-auto">
               {MOCK_ACTIVITY.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 gap-3">
                   <Activity size={24} className="text-gray-300" />

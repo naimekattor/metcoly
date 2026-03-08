@@ -1,41 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/nextInt/navigation';
 import { useParams } from 'next/navigation';
 import {
   ArrowLeft, Calendar, CheckCircle2, AlertCircle, Clock,
-  FileText, Mail, Phone, ArrowRight,
+  FileText, Mail, Phone, ArrowRight, Download, Eye, Trash2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-type CaseStatus = 'Under Review' | 'Approved' | 'Rejected' | 'Pending';
+import { applicationsAPI } from '@/lib/api/applications';
+import { documentsAPI } from '@/lib/api/documents';
 
-interface ApplicationDetail {
-  id: string;
-  client: string;
-  email: string;
-  phone: string;
-  type: string;
-  country: string;
-  status: CaseStatus;
-  submitted: string;
-  lastUpdate: string;
-  consultant: string;
-  priority: 'High' | 'Medium' | 'Low';
-}
-
-const ALL_APPLICATIONS: ApplicationDetail[] = [
-  { id: 'APP-102', client: 'James Wilson', email: 'james.wilson@email.com', phone: '+1 (555) 010-102', type: 'Study Permit', country: 'Canada', submitted: '2026-03-04', lastUpdate: '2026-03-04', status: 'Under Review', priority: 'High', consultant: 'Marc Davies' },
-  { id: 'APP-101', client: 'Linda Smith', email: 'linda.smith@email.com', phone: '+1 (555) 010-101', type: 'Work Permit', country: 'UK', submitted: '2026-03-04', lastUpdate: '2026-03-04', status: 'Approved', priority: 'Medium', consultant: 'Elena Popa' },
-  { id: 'APP-100', client: 'Kevin Lee', email: 'kevin.lee@email.com', phone: '+1 (555) 010-100', type: 'Express Entry', country: 'Canada', submitted: '2026-03-03', lastUpdate: '2026-03-03', status: 'Under Review', priority: 'High', consultant: 'Marc Davies' },
-  { id: 'APP-099', client: 'Emma Davis', email: 'emma.davis@email.com', phone: '+1 (555) 010-099', type: 'Sponsorship', country: 'Australia', submitted: '2026-03-02', lastUpdate: '2026-03-02', status: 'Approved', priority: 'Low', consultant: 'Robert Fox' },
-  { id: 'APP-098', client: 'Michael Scott', email: 'michael.scott@email.com', phone: '+1 (555) 010-098', type: 'Business Visa', country: 'Canada', submitted: '2026-03-01', lastUpdate: '2026-03-01', status: 'Rejected', priority: 'Medium', consultant: 'Elena Popa' },
-  { id: 'APP-097', client: 'Pam Beesly', email: 'pam.beesly@email.com', phone: '+1 (555) 010-097', type: 'Work Permit', country: 'Canada', submitted: '2026-02-28', lastUpdate: '2026-02-28', status: 'Pending', priority: 'Low', consultant: '' },
-];
-
-const STATUS_OPTIONS: CaseStatus[] = ['Pending', 'Under Review', 'Approved', 'Rejected'];
+type CaseStatus = 'PENDING' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'DOCUMENTS_MISSING' | 'PROCESSING';
 
 export default function SuperAdminApplicationDetailPage() {
   const t = useTranslations('superAdmin.applications.caseDetails');
@@ -44,14 +22,105 @@ export default function SuperAdminApplicationDetailPage() {
   const rawId = params?.id as string | undefined;
   const appId = rawId ? decodeURIComponent(rawId) : '';
 
-  const currentApp = useMemo(
-    () => ALL_APPLICATIONS.find((a) => a.id === appId) ?? ALL_APPLICATIONS[0],
-    [appId],
-  );
-
-  const [status, setStatus] = useState<CaseStatus>(currentApp.status);
-  const [priority, setPriority] = useState<'High' | 'Medium' | 'Low'>(currentApp.priority);
+  const [currentApp, setCurrentApp] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<CaseStatus>('PENDING');
+  const [priority, setPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
   const [activeTab, setActiveTab] = useState<'timeline' | 'documents' | 'notes'>('timeline');
+  const [noteContent, setNoteContent] = useState('');
+  const [savingNote, setSavingNote] = useState(false);
+
+  useEffect(() => {
+    const fetchApp = async () => {
+      if (!appId) return;
+      try {
+        setLoading(true);
+        const res = await applicationsAPI.getApplication(appId);
+        const appData = res?.data?.application || res?.data || res;
+        setCurrentApp(appData);
+        setStatus(appData?.status || 'PENDING');
+        setPriority(appData?.priority || 'Medium');
+      } catch (error) {
+        console.error('Failed to fetch application details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchApp();
+  }, [appId]);
+
+  const handleStatusChange = async (newStatus: CaseStatus) => {
+    setStatus(newStatus);
+    try {
+      await applicationsAPI.updateStatus(appId, newStatus, 'Status updated by Super Admin');
+    } catch (error) {
+      console.error('Failed to update status', error);
+      // Revert on failure
+      setStatus(currentApp.status);
+    }
+  };
+
+  const handleDownload = async (docId: string, fileName: string) => {
+    try {
+      const blob = await documentsAPI.downloadDocument(docId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download document:', error);
+    }
+  };
+
+  const handleDeleteDocument = async (docId: string) => {
+    if (!confirm('Are you sure you want to delete this document?')) return;
+    try {
+      await documentsAPI.deleteDocument(docId);
+      // Refresh app data
+      const res = await applicationsAPI.getApplication(appId);
+      setCurrentApp(res?.data?.application || res?.data || res);
+    } catch (error) {
+      console.error('Failed to delete document:', error);
+    }
+  };
+
+  const handleSaveNote = async () => {
+    if (!noteContent.trim()) return;
+    try {
+      setSavingNote(true);
+      await applicationsAPI.addNote(appId, noteContent);
+      setNoteContent('');
+      // Refresh app data
+      const res = await applicationsAPI.getApplication(appId);
+      setCurrentApp(res?.data?.application || res?.data || res);
+    } catch (error) {
+      console.error('Failed to save note:', error);
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const STATUS_OPTIONS: CaseStatus[] = ['PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'DOCUMENTS_MISSING', 'PROCESSING'];
+
+  if (loading) {
+    return <div className="p-8 text-center text-gray-500">Loading application details...</div>;
+  }
+
+  if (!currentApp) {
+    return <div className="p-8 text-center text-red-500">Application not found.</div>;
+  }
 
   return (
     <motion.div 
@@ -86,8 +155,8 @@ export default function SuperAdminApplicationDetailPage() {
               <option value="Low">{t('priority.low')}</option>
             </select>
           </div>
-          <h1 className="text-3xl font-black text-[#0F2A4D] tracking-tight">{currentApp.id}</h1>
-          <p className="text-gray-500 font-medium">{currentApp.type} • {currentApp.client}</p>
+          <h1 className="text-3xl font-black text-[#0F2A4D] tracking-tight">{currentApp.applicationNumber || currentApp.id.substring(0, 8)}</h1>
+          <p className="text-gray-500 font-medium">{currentApp.service?.name || 'N/A'} • {currentApp.client?.firstName} {currentApp.client?.lastName}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -96,11 +165,11 @@ export default function SuperAdminApplicationDetailPage() {
               <span className="text-xs font-bold text-gray-400">{t_shared('table.status')}:</span>
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as CaseStatus)}
+                onChange={(e) => handleStatusChange(e.target.value as CaseStatus)}
                 className="text-sm font-bold text-[#0F2A4D] bg-transparent outline-none cursor-pointer"
               >
                 {STATUS_OPTIONS.map((s) => (
-                  <option key={s} value={s}>{s}</option>
+                  <option key={s} value={s}>{s.replace('_', ' ')}</option>
                 ))}
               </select>
             </div>
@@ -127,10 +196,10 @@ export default function SuperAdminApplicationDetailPage() {
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
               {[
-                { label: t('overview.submitted'), value: currentApp.submitted },
-                { label: t('overview.updated'), value: currentApp.lastUpdate },
-                { label: t('overview.type'), value: currentApp.type },
-                { label: t('overview.assigned'), value: currentApp.consultant || t_shared('notAssigned') }
+                { label: t('overview.submitted'), value: currentApp.submittedAt ? new Date(currentApp.submittedAt).toLocaleDateString() : 'Draft' },
+                { label: t('overview.updated'), value: currentApp.updatedAt ? new Date(currentApp.updatedAt).toLocaleDateString() : 'N/A' },
+                { label: t('overview.type'), value: currentApp.service?.name || 'N/A' },
+                { label: t('overview.assigned'), value: currentApp.consultant?.firstName ? `${currentApp.consultant.firstName} ${currentApp.consultant.lastName}` : t_shared('notAssigned') }
               ].map((item, i) => (
                 <div key={i}>
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{item.label}</p>
@@ -167,10 +236,10 @@ export default function SuperAdminApplicationDetailPage() {
               {activeTab === 'timeline' && (
                 <div className="space-y-8 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-100">
                   {[
-                    { title: t('timeline.steps.submitted'), date: currentApp.submitted, done: true },
-                    { title: t('timeline.steps.review'), date: 'Mar 04, 2026', done: true },
-                    { title: t('timeline.steps.docs'), date: 'Mar 05, 2026', done: false },
-                    { title: t('timeline.steps.submit'), date: 'Estimated Mar 20, 2026', done: false }
+                    { title: t('timeline.steps.submitted'), date: currentApp.submittedAt ? new Date(currentApp.submittedAt).toLocaleDateString() : 'Pending', done: !!currentApp.submittedAt },
+                    { title: t('timeline.steps.review'), date: currentApp.assignedAt ? new Date(currentApp.assignedAt).toLocaleDateString() : 'Pending', done: !!currentApp.assignedAt },
+                    { title: t('timeline.steps.docs'), date: currentApp.lastStatusChangeAt ? new Date(currentApp.lastStatusChangeAt).toLocaleDateString() : 'Pending', done: ['DOCUMENTS_MISSING', 'PROCESSING', 'APPROVED'].includes(currentApp.status) },
+                    { title: t('timeline.steps.submit'), date: currentApp.status === 'APPROVED' ? 'Approved' : 'Pending', done: currentApp.status === 'APPROVED' }
                   ].map((step, i) => (
                     <div key={i} className="flex gap-6 relative">
                       <div className={`w-4 h-4 rounded-full border-2 z-10 ${
@@ -186,24 +255,93 @@ export default function SuperAdminApplicationDetailPage() {
               )}
 
               {activeTab === 'documents' && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FileText className="text-gray-300" />
-                  </div>
-                  <p className="text-sm text-gray-400 font-medium">{t('documents.empty')}</p>
+                <div className="space-y-4">
+                  {(!currentApp.documents || currentApp.documents.length === 0) ? (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FileText className="text-gray-300" />
+                      </div>
+                      <p className="text-sm text-gray-400 font-medium">{t('documents.empty')}</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {currentApp.documents.map((doc: any) => (
+                        <div key={doc.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between group hover:border-blue-500/30 hover:bg-white transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-gray-100 text-blue-500 shadow-sm">
+                              <FileText size={20} />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-bold text-[#0F2A4D] truncate max-w-[150px]">{doc.fileName}</span>
+                              <span className="text-[10px] text-gray-400 font-medium">
+                                {formatFileSize(Number(doc.fileSize))} • {new Date(doc.uploadedAt).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => handleDownload(doc.id, doc.fileName)}
+                              className="p-2 hover:bg-blue-50 text-gray-400 hover:text-blue-500 rounded-lg transition-colors"
+                              title="Download"
+                            >
+                              <Download size={16} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteDocument(doc.id)}
+                              className="p-2 hover:bg-rose-50 text-gray-400 hover:text-rose-500 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
               {activeTab === 'notes' && (
-                <div className="space-y-4">
-                  <textarea 
-                    className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all min-h-[120px]"
-                    placeholder={t('notes.placeholder')}
-                  />
-                  <div className="flex justify-end">
-                    <button className="bg-white border border-gray-200 text-[#0F2A4D] px-6 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 transition-colors">
-                      {t('notes.save')}
-                    </button>
+                <div className="space-y-6">
+                  {/* New Note Form */}
+                  <div className="space-y-4">
+                    <textarea 
+                      value={noteContent}
+                      onChange={(e) => setNoteContent(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all min-h-[120px]"
+                      placeholder={t('notes.placeholder')}
+                      disabled={savingNote}
+                    />
+                    <div className="flex justify-end">
+                      <button 
+                        onClick={handleSaveNote}
+                        disabled={savingNote || !noteContent.trim()}
+                        className="bg-white border border-gray-200 text-[#0F2A4D] px-6 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      >
+                        {savingNote ? 'Saving...' : t('notes.save')}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Notes List */}
+                  <div className="space-y-4 mt-8">
+                    {currentApp.notes?.length > 0 ? (
+                      currentApp.notes.map((note: any) => (
+                        <div key={note.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs font-bold text-[#0F2A4D] uppercase">
+                              {note.consultant?.firstName} {note.consultant?.lastName}
+                            </span>
+                            <span className="text-[10px] text-gray-400">
+                              {new Date(note.createdAt).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 leading-relaxed">{note.content}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-gray-400 text-sm py-8">{t('notes.empty') || 'No internal notes yet.'}</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -217,23 +355,23 @@ export default function SuperAdminApplicationDetailPage() {
             <h3 className="text-sm font-bold text-[#0F2A4D] uppercase tracking-widest">{t('clientInfo.title')}</h3>
             
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#0F2A4D] flex items-center justify-center text-white font-black text-sm">
-                {currentApp.client.split(' ').map(n => n[0]).join('')}
+              <div className="w-12 h-12 rounded-full bg-[#0F2A4D] flex items-center justify-center text-white font-black text-sm uppercase">
+                {currentApp.client?.firstName?.[0] || ''}{currentApp.client?.lastName?.[0] || ''}
               </div>
               <div>
-                <p className="font-bold text-[#0F2A4D]">{currentApp.client}</p>
-                <p className="text-xs text-gray-400 font-medium">{currentApp.country}</p>
+                <p className="font-bold text-[#0F2A4D]">{currentApp.client?.firstName} {currentApp.client?.lastName}</p>
+                <p className="text-xs text-gray-400 font-medium">{currentApp.country || 'N/A'}</p>
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-gray-500 font-medium">
                 <Mail size={16} className="text-gray-300" />
-                {currentApp.email}
+                {currentApp.client?.email || 'N/A'}
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-500 font-medium">
                 <Phone size={16} className="text-gray-300" />
-                {currentApp.phone}
+                 {currentApp.formData?.phone || currentApp.client?.phone || 'N/A'}
               </div>
             </div>
 
@@ -246,7 +384,7 @@ export default function SuperAdminApplicationDetailPage() {
           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
              <h3 className="text-sm font-bold text-[#0F2A4D] uppercase tracking-widest mb-6">{t('quickActions.title')}</h3>
              <div className="space-y-3">
-               {[
+               {/* {[
                  { label: t('quickActions.schedule'), icon: Calendar },
                  { label: t('quickActions.generate'), icon: FileText }
                ].map((action, i) => (
@@ -254,7 +392,7 @@ export default function SuperAdminApplicationDetailPage() {
                    <action.icon size={18} className="text-gray-400" />
                    {action.label}
                  </button>
-               ))}
+               ))} */}
                <button className="w-full flex items-center gap-3 p-3 rounded-xl border border-rose-50 hover:bg-rose-50/50 transition-all text-sm font-bold text-rose-600">
                  <AlertCircle size={18} />
                  {t('quickActions.close')}

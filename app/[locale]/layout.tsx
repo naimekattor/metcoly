@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { locales } from '@/nextInt/config';
+import { AuthProvider } from '@/components/providers/AuthProvider';
 
 
 
@@ -26,9 +27,11 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <div className="flex min-h-screen flex-col">
-        {children}
-      </div>
+      <AuthProvider>
+        <div className="flex min-h-screen flex-col">
+          {children}
+        </div>
+      </AuthProvider>
     </NextIntlClientProvider>
   );
 }

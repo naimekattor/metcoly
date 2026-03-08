@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
+import { applicationsAPI } from '@/lib/api/applications';
 import {
   Plus, Search, Filter, Eye,
   FileText, Loader2, Eye as EyeIcon, CheckCircle2, Calendar,
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type Status   = 'In Progress' | 'Under Review' | 'Completed' | 'Pending Documents';
-type Priority = 'High' | 'Medium' | 'Low';
+type Status   = 'In Progress' | 'Under Review' | 'Completed' | 'Pending Documents' | 'Submitted' | 'Approved' | 'Rejected' | 'Pending' | string;
+type Priority = 'High' | 'Medium' | 'Low' | string;
 
 type Case = {
   id: string;
@@ -23,38 +25,33 @@ type Case = {
   consultant: string;
 };
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
-const MOCK_CASES: Case[] = [
-  {
-    id: 'C001', type: 'Work Permit',  description: 'Work permit extension application',
-    status: 'In Progress',       priority: 'High',   submitted: '2026-02-15', consultant: 'Sarah Johnson',
-  },
-  {
-    id: 'C007', type: 'Study Permit', description: 'Study permit for Masters program',
-    status: 'Under Review',      priority: 'Medium', submitted: '2026-02-10', consultant: 'Michael Chen',
-  },
-  {
-    id: 'C012', type: 'Visitor Visa', description: 'Family visit visa application',
-    status: 'Completed',         priority: 'Low',    submitted: '2026-01-20', consultant: 'Emily Rodriguez',
-  },
-  {
-    id: 'C015', type: 'Work Permit',  description: 'LMIA-based work permit',
-    status: 'Pending Documents', priority: 'High',   submitted: '2026-02-18', consultant: 'Sarah Johnson',
-  },
-];
-
 // ── Style maps ────────────────────────────────────────────────────────────────
-const STATUS_STYLES: Record<Status, string> = {
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT:             'Draft',
+  SUBMITTED:         'Submitted',
+  UNDER_REVIEW:      'Under Review',
+  DOCUMENTS_MISSING: 'Pending Documents',
+  PROCESSING:        'In Progress',
+  APPROVED:          'Approved',
+  REJECTED:          'Rejected',
+  CLOSED:            'Closed',
+};
+
+const STATUS_STYLES: Record<string, string> = {
   'In Progress':       'bg-blue-100 text-blue-700 border border-blue-200',
   'Under Review':      'bg-yellow-100 text-yellow-700 border border-yellow-200',
   'Completed':         'bg-green-100 text-green-700 border border-green-200',
+  'Approved':          'bg-green-100 text-green-700 border border-green-200',
   'Pending Documents': 'bg-orange-100 text-orange-700 border border-orange-200',
+  'Submitted':         'bg-gray-100 text-gray-700 border border-gray-200',
+  'Rejected':          'bg-red-100 text-red-700 border border-red-200',
 };
 
-const PRIORITY_STYLES: Record<Priority, string> = {
+const PRIORITY_STYLES: Record<string, string> = {
   High:   'bg-red-100 text-red-600 border border-red-200',
   Medium: 'bg-yellow-100 text-yellow-600 border border-yellow-200',
   Low:    'bg-green-100 text-green-600 border border-green-200',
+  Normal: 'bg-gray-100 text-gray-600 border border-gray-200',
 };
 
 // ── Stat Card ─────────────────────────────────────────────────────────────────
@@ -75,16 +72,56 @@ export default function MyCasesPage() {
   const pathname = usePathname();
 
   const [search, setSearch]       = useState('');
-  const [statusFilter, setStatus] = useState<'all' | Status>('all');
+  const [statusFilter, setStatus] = useState<'all' | string>('all');
+  
+  const [cases, setCases] = useState<Case[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCases = async () => {
+    try {
+      setLoading(true);
+      const res = await applicationsAPI.getMyApplications();
+      const applications = Array.isArray(res.data?.applications) 
+        ? res.data.applications 
+        : (Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []));
+      
+      const mapped = applications.map((app: any) => ({
+        id: app.applicationId || app.id || 'N/A',
+        type: app.service?.name || 'General Application',
+        description: app.formData?.firstName
+          ? `${app.formData.firstName} ${app.formData.lastName || ''}`.trim()
+          : 'Application case',
+        status: STATUS_LABEL[app.status] || app.status || 'Submitted',
+        priority: app.priority || 'Normal',
+        submitted: app.createdAt
+          ? new Date(app.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+          : '—',
+        consultant: app.consultant
+          ? `${app.consultant.firstName} ${app.consultant.lastName}`
+          : 'Unassigned',
+      }));
+      
+      setCases(mapped);
+    } catch (err: any) {
+      console.error('Failed to load applications:', err);
+      toast.error('Failed to load your cases.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCases();
+  }, []);
 
   // Derived stats
-  const inProgress  = MOCK_CASES.filter((c) => c.status === 'In Progress').length;
-  const underReview = MOCK_CASES.filter((c) => c.status === 'Under Review').length;
-  const completed   = MOCK_CASES.filter((c) => c.status === 'Completed').length;
+  const inProgress  = cases.filter((c) => c.status !== 'Completed' && c.status !== 'Approved' && c.status !== 'Rejected').length;
+  const underReview = cases.filter((c) => c.status === 'Under Review' || c.status === 'inReview').length;
+  const completed   = cases.filter((c) => c.status === 'Completed' || c.status === 'Approved').length;
 
   // Filtered list
   const filtered = useMemo(() => {
-    return MOCK_CASES.filter((c) => {
+    return cases.filter((c) => {
       const matchSearch =
         c.id.toLowerCase().includes(search.toLowerCase()) ||
         c.type.toLowerCase().includes(search.toLowerCase()) ||
@@ -93,14 +130,15 @@ export default function MyCasesPage() {
       const matchStatus = statusFilter === 'all' || c.status === statusFilter;
       return matchSearch && matchStatus;
     });
-  }, [search, statusFilter]);
+  }, [cases, search, statusFilter]);
 
-  const STATUS_OPTIONS: Array<{ value: 'all' | Status; label: string }> = [
+  const STATUS_OPTIONS: Array<{ value: 'all' | string; label: string }> = [
     { value: 'all',               label: t('filters.allStatuses')       },
     { value: 'In Progress',       label: t('filters.inProgress')        },
     { value: 'Under Review',      label: t('filters.underReview')       },
     { value: 'Completed',         label: t('filters.completed')         },
     { value: 'Pending Documents', label: t('filters.pendingDocuments')  },
+    { value: 'Submitted',         label: 'Submitted'  },
   ];
 
   return (
@@ -123,7 +161,7 @@ export default function MyCasesPage() {
 
         {/* ── Stat Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard label={t('stats.total')}       value={MOCK_CASES.length} />
+          <StatCard label={t('stats.total')}       value={cases.length} />
           <StatCard label={t('stats.inProgress')}  value={inProgress}  />
           <StatCard label={t('stats.underReview')} value={underReview} />
           <StatCard label={t('stats.completed')}   value={completed}   highlight />
@@ -157,7 +195,7 @@ export default function MyCasesPage() {
               <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatus(e.target.value as typeof statusFilter)}
+                onChange={(e) => setStatus(e.target.value)}
                 className="pl-8 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1b3d6e]/20 focus:border-[#1b3d6e] bg-white text-gray-700 transition appearance-none cursor-pointer"
               >
                 {STATUS_OPTIONS.map((o) => (
@@ -192,7 +230,13 @@ export default function MyCasesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-12 text-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-[#1b3d6e] mx-auto" />
+                    </td>
+                  </tr>
+                ) : filtered.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-6 py-12 text-center text-gray-400 text-sm">
                       {t('empty')}
@@ -205,12 +249,12 @@ export default function MyCasesPage() {
                       <td className="px-6 py-4 text-gray-600">{c.type}</td>
                       <td className="px-6 py-4 text-gray-600 max-w-[220px] truncate">{c.description}</td>
                       <td className="px-6 py-4">
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[c.status]}`}>
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[c.status] || 'bg-gray-100 text-gray-600'}`}>
                           {c.status}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${PRIORITY_STYLES[c.priority]}`}>
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${PRIORITY_STYLES[c.priority] || 'bg-gray-100 text-gray-600'}`}>
                           {c.priority}
                         </span>
                       </td>
@@ -239,7 +283,11 @@ export default function MyCasesPage() {
 
           {/* ── Mobile Cards ── */}
           <div className="md:hidden divide-y divide-gray-100">
-            {filtered.length === 0 ? (
+            {loading ? (
+              <div className="px-6 py-12 text-center">
+                <Loader2 className="w-6 h-6 animate-spin text-[#1b3d6e] mx-auto" />
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="px-6 py-12 text-center text-gray-400 text-sm">{t('empty')}</div>
             ) : (
               filtered.map((c) => (
@@ -250,7 +298,7 @@ export default function MyCasesPage() {
                       <p className="text-gray-500 text-xs mt-0.5">{c.type}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[c.status]}`}>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_STYLES[c.status] || 'bg-gray-100 text-gray-600'}`}>
                         {c.status}
                       </span>
                       <Link
@@ -263,7 +311,7 @@ export default function MyCasesPage() {
                   </div>
                   <p className="text-gray-600 text-xs">{c.description}</p>
                   <div className="flex items-center flex-wrap gap-3 text-xs text-gray-500">
-                    <span className={`font-semibold px-2 py-0.5 rounded-full ${PRIORITY_STYLES[c.priority]}`}>
+                    <span className={`font-semibold px-2 py-0.5 rounded-full ${PRIORITY_STYLES[c.priority] || 'bg-gray-100 text-gray-600'}`}>
                       {c.priority}
                     </span>
                     <span className="flex items-center gap-1">

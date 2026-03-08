@@ -9,6 +9,7 @@
   },
   "dashboard": {
     "navigation": {
+      "header": "Menu Principal",
       "user": {
         "myStatus": "Mon statut",
         "myCases": "Mes dossiers",

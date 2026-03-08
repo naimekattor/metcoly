@@ -14,23 +14,31 @@ import {
   User,
   ArrowRight
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/nextInt/navigation';
 import ActionMenu from '@/components/dashboard/super-admin/ActionMenu';
+import { applicationsAPI } from '@/lib/api/applications';
+import { usersAPI } from '@/lib/api/users';
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
+// ── Types ───────────────────────────────────────────────────────────────────
 
-const CONSULTANTS = ['Marc Davies', 'Elena Popa', 'Robert Fox', 'Unassigned'];
+interface Application {
+  id: string;
+  client: { firstName: string; lastName: string; email: string };
+  consultant: { id: string; firstName: string; lastName: string; email: string } | null;
+  service: { name: string };
+  status: string;
+  priority: string;
+  createdAt: string;
+}
 
-const APPLICATIONS_INIT = [
-  { id: 'APP-102', client: 'James Wilson', type: 'Study Permit', country: 'Canada', date: 'Mar 04, 2026', status: 'Under Review', priority: 'High', consultant: 'Marc Davies' },
-  { id: 'APP-101', client: 'Linda Smith', type: 'Work Permit', country: 'UK', date: 'Mar 04, 2026', status: 'Approved', priority: 'Medium', consultant: 'Elena Popa' },
-  { id: 'APP-100', client: 'Kevin Lee', type: 'Express Entry', country: 'Canada', date: 'Mar 03, 2026', status: 'Under Review', priority: 'High', consultant: 'Marc Davies' },
-  { id: 'APP-099', client: 'Emma Davis', type: 'Sponsorship', country: 'Australia', date: 'Mar 02, 2026', status: 'Approved', priority: 'Low', consultant: 'Robert Fox' },
-  { id: 'APP-098', client: 'Michael Scott', type: 'Business Visa', country: 'Canada', date: 'Mar 01, 2026', status: 'Rejected', priority: 'Medium', consultant: 'Elena Popa' },
-  { id: 'APP-097', client: 'Pam Beesly', type: 'Work Permit', country: 'Canada', date: 'Feb 28, 2026', status: 'Pending', priority: 'Low', consultant: '' },
-];
+interface Consultant {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
 
 const container = {
   hidden: { opacity: 0 },
@@ -49,25 +57,85 @@ export default function ApplicationsPage() {
   const t = useTranslations('superAdmin.applications');
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [apps, setApps] = useState(APPLICATIONS_INIT);
+  
+  const [apps, setApps] = useState<Application[]>([]);
+  const [consultants, setConsultants] = useState<Consultant[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const router = useRouter();
 
-  const handleAssignConsultant = (appId: string, consultant: string) => {
-    setApps(prevApps => prevApps.map(app => 
-      app.id === appId ? { ...app, consultant: consultant === 'Unassigned' ? '' : consultant } : app
-    ));
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [appsRes, usersRes] = await Promise.all([
+        applicationsAPI.getAllApplications(),
+        usersAPI.getAllUsers({ role: 'CONSULTANT' })
+      ]);
+      
+      const appsArray = Array.isArray(appsRes?.data?.applications) ? appsRes.data.applications : 
+                        Array.isArray(appsRes?.data) ? appsRes.data : 
+                        Array.isArray(appsRes) ? appsRes : [];
+                        
+      const usersArray = Array.isArray(usersRes?.data?.users) ? usersRes.data.users : 
+                         Array.isArray(usersRes?.data) ? usersRes.data : 
+                         Array.isArray(usersRes) ? usersRes : [];
+
+      setApps(appsArray);
+      setConsultants(usersArray);
+    } catch (error) {
+      console.error('Failed to fetch applications or consultants', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePriorityChange = (appId: string, priority: string) => {
-    setApps(prevApps => prevApps.map(app => 
-      app.id === appId ? { ...app, priority: priority as 'High' | 'Medium' | 'Low' } : app
-    ));
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleAssignConsultant = async (appId: string, consultantId: string) => {
+    try {
+      await applicationsAPI.assignConsultant(appId, consultantId);
+      // Optimistic update
+      setApps(prevApps => prevApps.map(app => 
+        app.id === appId ? { ...app, consultant: consultantId === 'Unassigned' ? null : consultants.find(c => c.id === consultantId) || null } : app
+      ));
+    } catch (error) {
+      console.error('Failed to assign consultant', error);
+      fetchData(); // fallback refresh
+    }
+  };
+
+  const handlePriorityChange = async (appId: string, priority: string) => {
+    try {
+      // In backend to change priority we might need a general update or updateStatus if priority is bundled there.
+      // Assuming a dedicated endpoint or update property via updateApplication
+      await applicationsAPI.updateApplication(appId, { priority });
+      setApps(prevApps => prevApps.map(app => 
+        app.id === appId ? { ...app, priority } : app
+      ));
+    } catch (error) {
+      console.error('Failed to update priority', error);
+      fetchData();
+    }
+  };
+
+  const handleStatusChange = async (appId: string, status: string) => {
+    try {
+      await applicationsAPI.updateStatus(appId, status, 'Status updated by Super Admin');
+      setApps(prevApps => prevApps.map(app => 
+        app.id === appId ? { ...app, status } : app
+      ));
+    } catch (error) {
+      console.error('Failed to update status', error);
+      fetchData();
+    }
   };
 
   const filteredApps = apps.filter(app => {
-    const matchesFilter = filter === 'All' || app.status === filter;
-    const matchesSearch = app.client.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesFilter = filter === 'All' || app.status === filter.toUpperCase().replace(' ', '_');
+    const clientName = `${app.client?.firstName || ''} ${app.client?.lastName || ''}`;
+    const matchesSearch = clientName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           app.id.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
@@ -149,39 +217,59 @@ export default function ApplicationsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filteredApps.map((app) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    Loading applications...
+                  </td>
+                </tr>
+              ) : filteredApps.map((app) => (
                 <tr key={app.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-[#0F2A4D]">{app.id}</span>
-                      <span className="text-xs text-gray-400">{app.type}</span>
+                      <span className="text-sm font-bold text-[#0F2A4D]">{app.id.substring(0, 8)}</span>
+                      <span className="text-xs text-gray-400">{app.service?.name}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-gray-900">{app.client}</span>
-                      <span className="text-xs text-gray-400">{app.country}</span>
+                      <span className="text-sm font-semibold text-gray-900">{app.client?.firstName} {app.client?.lastName}</span>
+                      <span className="text-xs text-gray-400">{new Date(app.createdAt).toLocaleDateString()}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="relative group/select max-w-[160px]">
                       <select 
-                        value={app.consultant || 'Unassigned'}
+                        value={app.consultant?.id || 'Unassigned'}
                         onChange={(e) => handleAssignConsultant(app.id, e.target.value)}
                         className={`w-full bg-gray-50 border border-gray-100 rounded-lg py-1.5 pl-3 pr-8 text-[11px] font-bold appearance-none cursor-pointer focus:ring-2 focus:ring-[#0F2A4D]/10 focus:border-[#0F2A4D] transition-all ${
                           app.consultant ? 'text-[#0F2A4D]' : 'text-gray-400 italic'
                         }`}
                       >
                         <option value="Unassigned">{t('notAssigned')}</option>
-                        {CONSULTANTS.filter(c => c !== 'Unassigned').map(c => (
-                          <option key={c} value={c}>{c}</option>
+                        {consultants.map(c => (
+                          <option key={c.id} value={c.id}>{c.firstName} {c.lastName}</option>
                         ))}
                       </select>
                       <ArrowRight size={10} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover/select:translate-x-0.5 transition-transform rotate-90" />
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <StatusBadge status={app.status} />
+                    <select 
+                      value={app.status || 'PENDING'}
+                      onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                      className={`appearance-none bg-transparent text-[10px] font-bold px-2 py-0.5 rounded outline-none cursor-pointer border transition-all ${
+                        app.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                        app.status === 'UNDER_REVIEW' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                        app.status === 'REJECTED' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                        'bg-amber-50 text-amber-600 border-amber-100'
+                      }`}
+                    >
+                      <option value="PENDING">Pending</option>
+                      <option value="UNDER_REVIEW">Under Review</option>
+                      <option value="APPROVED">Approved</option>
+                      <option value="REJECTED">Rejected</option>
+                    </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="relative group/priority max-w-[100px]">
@@ -207,6 +295,13 @@ export default function ApplicationsPage() {
                   </td>
                 </tr>
               ))}
+              {!loading && filteredApps.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
+                    No applications found matching your criteria.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -217,15 +312,15 @@ export default function ApplicationsPage() {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    'Approved': 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    'Pending': 'bg-amber-50 text-amber-600 border-amber-100',
-    'Under Review': 'bg-blue-50 text-blue-600 border-blue-100',
-    'Rejected': 'bg-rose-50 text-rose-600 border-rose-100',
+    'APPROVED': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    'PENDING': 'bg-amber-50 text-amber-600 border-amber-100',
+    'UNDER_REVIEW': 'bg-blue-50 text-blue-600 border-blue-100',
+    'REJECTED': 'bg-rose-50 text-rose-600 border-rose-100',
   };
 
   return (
-    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${styles[status]}`}>
-      {status}
+    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${styles[status] || 'bg-gray-50 text-gray-500 border-gray-100'}`}>
+      {status ? status.replace('_', ' ') : 'UNKNOWN'}
     </span>
   );
 }

@@ -3,9 +3,13 @@
 import { useTranslations } from 'next-intl';
 import { useCaseStore } from '@/stores/useCaseStore';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CheckCircle2, ShieldCheck, FileCheck, Send, Info } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ShieldCheck, FileCheck, Info } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
+import { applicationsAPI } from '@/lib/api/applications';
+import { documentsAPI } from '@/lib/api/documents';
+import { paymentsAPI } from '@/lib/api/payments';
 
 export default function ReviewStep() {
   const t = useTranslations('dashboard.newCase.step4');
@@ -14,12 +18,51 @@ export default function ReviewStep() {
   const router = useRouter();
 
   const handleFinalSubmit = async () => {
-    setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    resetForm();
-    router.push('/dashboard/user/my-cases');
+    try {
+      if (!serviceType) {
+        toast.error('Service type is required');
+        return;
+      }
+      setIsSubmitting(true);
+      
+      // 1. Create the application (Status: DRAFT)
+      const applicationRes = await applicationsAPI.createApplication({
+        serviceId: serviceType.id,
+        country: personalInfo.nationality || 'N/A', // fallback if empty
+        formData: personalInfo,
+      });
+      
+      const applicationId = applicationRes.data.application.id;
+
+      // 2. Upload documents associated to the new application
+      const uploadPromises = Object.entries(documents).map(async ([docKey, file]) => {
+        if (file) {
+          // The backend could validate doc keys, passing uppercase to be safe typical identifiers
+          await documentsAPI.uploadDocument(file as File, applicationId, docKey.toUpperCase());
+        }
+      });
+      
+      await Promise.all(uploadPromises);
+
+      // 3. Initiate payment session
+      const paymentRes = await paymentsAPI.createSession({
+        applicationId,
+        paymentType: 'PROCESSING',
+      });
+      
+      const { url } = paymentRes.data;
+      
+      if (url) {
+        resetForm();
+        window.location.href = url; // Redirect to Stripe Checkout
+      } else {
+        toast.error('Payment URL was not generated.');
+      }
+    } catch (error: any) {
+      console.error('Submission failed:', error);
+      toast.error(error?.response?.data?.message || 'Failed to submit application.');
+      setIsSubmitting(false); // only re-enable if failed; if success it's redirecting
+    }
   };
 
   const docCount = Object.values(documents).filter(file => file !== null).length;
@@ -73,7 +116,7 @@ export default function ReviewStep() {
             </div>
             <div>
               <p className="text-sm font-medium text-[#856404] leading-relaxed">
-                By submitting this application, you agree to our Terms of Service and confirm that all information provided is accurate and complete.
+                By submitting this application, you agree to our Terms of Service and confirm that all information provided is accurate and complete. You will be redirected to complete the application payment.
               </p>
             </div>
           </div>
@@ -120,11 +163,11 @@ export default function ReviewStep() {
                 transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
                 className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
               />
-              Submitting...
+              Processing...
             </>
           ) : (
             <>
-              Submit Application
+              Proceed to Payment
               <CheckCircle2 size={20} />
             </>
           )}

@@ -55,10 +55,10 @@ export default function Topbar({ onMenuClick, title = "Dashboard" }: TopbarProps
         </div>
 
         {/* Notifications */}
-        <button className="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
+        {/* <button className="relative p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
           <Bell size={20} />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
-        </button>
+        </button> */}
 
         {/* Divider */}
         <div className="h-8 w-px bg-gray-100 hidden sm:block mx-1"></div>

@@ -1,13 +1,19 @@
 import { useEffect } from 'react';
 import Script from 'next/script';
 
-export default function BookingWidget({ eventType, userId, prefill }) {
+interface BookingWidgetProps {
+  eventType: string;
+  userId: string;
+  prefill?: any;
+}
+
+export default function BookingWidget({ eventType, userId, prefill }: BookingWidgetProps) {
   useEffect(() => {
     // Initialize Cal.com widget
-    if (window.Cal) {
-      window.Cal.ns[`cal-${eventType}`]?.('init');
+    if (typeof window !== 'undefined' && (window as any).Cal) {
+      (window as any).Cal.ns[`cal-${eventType}`]?.('init');
     }
-  }, []);
+  }, [eventType]);
 
   return (
     <>

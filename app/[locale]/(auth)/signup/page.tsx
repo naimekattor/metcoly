@@ -1,13 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { Link } from '@/nextInt/navigation';
+import { Link, useRouter } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import {
   Eye, EyeOff, MapPin, CheckCircle,
   FileText, Clock, Headphones, Lock,
 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { useToast } from '@/hooks/useToast';
 
 // ── Left Branding Panel ───────────────────────────────────────────────────────
 function BrandingPanel() {
@@ -105,11 +107,19 @@ function BrandingPanel() {
 function SignupForm() {
   const t = useTranslations('auth.signup.form');
   const pathname = usePathname();
+  const router = useRouter();
+  const register = useAuthStore((state) => state.register);
+  const { error, success } = useToast();
 
   const [showPassword, setShowPassword]        = useState(false);
   const [showConfirm, setShowConfirm]          = useState(false);
   const [agreed, setAgreed]                    = useState(false);
   const [loading, setLoading]                  = useState(false);
+  
+  // Registration form explicit state
+  const [firstName, setFirstName]              = useState('');
+  const [lastName, setLastName]                = useState('');
+  const [email, setEmail]                      = useState('');
   const [password, setPassword]                = useState('');
   const [confirm, setConfirm]                  = useState('');
   const [confirmError, setConfirmError]        = useState('');
@@ -122,8 +132,15 @@ function SignupForm() {
     }
     setConfirmError('');
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
+    try {
+      await register({ firstName, lastName, email, password });
+      success('Account created successfully!');
+      router.push('/dashboard/user'); // Redirect to their new dashboard
+    } catch (err: any) {
+      error(err.response?.data?.message || err.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -167,6 +184,8 @@ function SignupForm() {
               <input
                 type="text"
                 placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 required
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1b3d6e]/30 focus:border-[#1b3d6e] transition"
               />
@@ -176,6 +195,8 @@ function SignupForm() {
               <input
                 type="text"
                 placeholder="Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 required
                 className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1b3d6e]/30 focus:border-[#1b3d6e] transition"
               />
@@ -188,6 +209,8 @@ function SignupForm() {
             <input
               type="email"
               placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1b3d6e]/30 focus:border-[#1b3d6e] transition"
             />

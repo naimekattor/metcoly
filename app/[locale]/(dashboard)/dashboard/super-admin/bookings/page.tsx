@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { bookingsAPI } from '@/lib/api/bookings';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -13,20 +15,18 @@ import {
   Clock, 
   AlertCircle 
 } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
+// ── Types ───────────────────────────────────────────────────────────────────
 
-const BOOKINGS = [
-  { id: 'BK-8821', client: 'Sarah Johnson', email: 'sarah.j@example.com', service: 'Initial Consultation', date: 'Mar 05, 2026', time: '10:00 AM', status: 'Approved', amount: '$150' },
-  { id: 'BK-8822', client: 'Ahmed Khan', email: 'ahmed.k@example.com', service: 'Study Permit Review', date: 'Mar 05, 2026', time: '11:30 AM', status: 'Pending', amount: '$200' },
-  { id: 'BK-8823', client: 'Sophie Chen', email: 'sophie.c@example.com', service: 'Work Permit Assessment', date: 'Mar 06, 2026', time: '02:00 PM', status: 'Completed', amount: '$180' },
-  { id: 'BK-8824', client: 'John Brown', email: 'j.brown@example.com', service: 'PR Points Calculation', date: 'Mar 06, 2026', time: '04:00 PM', status: 'No Show', amount: '$120' },
-  { id: 'BK-8825', client: 'Maria Garcia', email: 'm.garcia@example.com', service: 'Spousal Sponsorship', date: 'Mar 07, 2026', time: '09:00 AM', status: 'Rejected', amount: '$250' },
-  { id: 'BK-8826', client: 'David Wilson', email: 'd.wilson@example.com', service: 'Business Visa Info', date: 'Mar 08, 2026', time: '11:00 AM', status: 'Approved', amount: '$300' },
-  { id: 'BK-8827', client: 'Elena Popa', email: 'e.popa@example.com', service: 'Citizenship Prep', date: 'Mar 09, 2026', time: '03:30 PM', status: 'Pending', amount: '$150' },
-];
+interface Booking {
+  id: string;
+  client: { firstName: string; lastName: string; email: string };
+  service: { name: string; price: number };
+  bookingDate: string;
+  bookingTime: string;
+  status: string;
+}
 
 const container = {
   hidden: { opacity: 0 },
@@ -45,10 +45,43 @@ export default function BookingsPage() {
   const t = useTranslations('superAdmin.bookings');
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredBookings = BOOKINGS.filter(booking => {
-    const matchesFilter = filter === 'All' || booking.status === filter;
-    const matchesSearch = booking.client.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const fetchBookings = async () => {
+    try {
+      setLoading(true);
+      const res = await bookingsAPI.getAllBookings();
+      setBookings(res.data || []);
+    } catch (error) {
+      console.error('Failed to fetch bookings', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, []);
+
+  const handleAction = async (id: string, action: 'approve' | 'reject' | 'complete' | 'no-show') => {
+    try {
+      if (action === 'approve') await bookingsAPI.approveBooking(id);
+      if (action === 'reject') await bookingsAPI.rejectBooking(id);
+      if (action === 'complete') await bookingsAPI.completeBooking(id);
+      if (action === 'no-show') await bookingsAPI.markNoShow(id);
+      
+      fetchBookings(); // refresh data
+    } catch (error) {
+      console.error(`Failed to ${action} booking ${id}`, error);
+    }
+  };
+
+  const filteredBookings = bookings.filter(booking => {
+    const matchesFilter = filter === 'All' || booking.status === filter.toUpperCase().replace(' ', '_');
+    const clientName = `${booking.client?.firstName || ''} ${booking.client?.lastName || ''}`;
+    const matchesSearch = clientName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           booking.id.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
@@ -118,25 +151,31 @@ export default function BookingsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filteredBookings.map((booking) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    Loading bookings...
+                  </td>
+                </tr>
+              ) : filteredBookings.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors group">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span className="text-sm font-bold text-[#0F2A4D]">{booking.id}</span>
-                      <span className="text-xs text-gray-400">{booking.date} at {booking.time}</span>
+                      <span className="text-sm font-bold text-[#0F2A4D]">{booking.id.substring(0, 8)}</span>
+                      <span className="text-xs text-gray-400">{new Date(booking.bookingDate).toLocaleDateString()} at {booking.bookingTime}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-gray-900">{booking.client}</span>
-                      <span className="text-xs text-gray-400">{booking.email}</span>
+                      <span className="text-sm font-semibold text-gray-900">{booking.client?.firstName} {booking.client?.lastName}</span>
+                      <span className="text-xs text-gray-400">{booking.client?.email}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600 font-medium">{booking.service}</span>
+                    <span className="text-sm text-gray-600 font-medium">{booking.service?.name}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap font-bold text-gray-900">
-                    {booking.amount}
+                    ${booking.service?.price}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <StatusBadge status={booking.status} />
@@ -146,17 +185,33 @@ export default function BookingsPage() {
                       <button className="p-2 hover:bg-[#0F2A4D]/5 rounded-lg text-gray-400 hover:text-[#0F2A4D]" title="View Details">
                         <Eye size={18} />
                       </button>
-                      <button className="p-2 hover:bg-emerald-50 rounded-lg text-gray-400 hover:text-emerald-600" title="Approve">
-                        <CheckCircle2 size={18} />
-                      </button>
-                      <button className="p-2 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600" title="Reject">
-                        <XCircle size={18} />
-                      </button>
+                      
+                      {booking.status === 'PENDING' && (
+                        <>
+                          <button onClick={() => handleAction(booking.id, 'approve')} className="p-2 hover:bg-emerald-50 rounded-lg text-gray-400 hover:text-emerald-600" title="Approve">
+                            <CheckCircle2 size={18} />
+                          </button>
+                          <button onClick={() => handleAction(booking.id, 'reject')} className="p-2 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600" title="Reject">
+                            <XCircle size={18} />
+                          </button>
+                        </>
+                      )}
+                      
+                      {booking.status === 'APPROVED' && (
+                        <>
+                          <button onClick={() => handleAction(booking.id, 'complete')} className="p-2 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600" title="Mark Completed">
+                            <CheckCircle2 size={18} />
+                          </button>
+                          <button onClick={() => handleAction(booking.id, 'no-show')} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600" title="Mark No Show">
+                            <Clock size={18} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))}
-              {filteredBookings.length === 0 && (
+              {!loading && filteredBookings.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                     No bookings found matching your criteria.
@@ -167,7 +222,7 @@ export default function BookingsPage() {
           </table>
         </div>
         <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
-          <span className="text-xs text-gray-500 font-medium">Showing {filteredBookings.length} of {BOOKINGS.length} bookings</span>
+          <span className="text-xs text-gray-500 font-medium">Showing {filteredBookings.length} of {bookings.length} bookings</span>
           <div className="flex items-center gap-2">
             <button className="px-3 py-1.5 text-xs font-bold text-gray-400 hover:text-[#0F2A4D] disabled:opacity-50" disabled>Previous</button>
             <button className="px-3 py-1.5 text-xs font-bold text-[#0F2A4D] hover:bg-[#0F2A4D]/5 rounded-lg">Next</button>
@@ -180,16 +235,16 @@ export default function BookingsPage() {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    'Approved': 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    'Pending': 'bg-amber-50 text-amber-600 border-amber-100',
-    'Completed': 'bg-blue-50 text-blue-600 border-blue-100',
-    'No Show': 'bg-gray-50 text-gray-500 border-gray-100',
-    'Rejected': 'bg-rose-50 text-rose-600 border-rose-100',
+    'APPROVED': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    'PENDING': 'bg-amber-50 text-amber-600 border-amber-100',
+    'COMPLETED': 'bg-blue-50 text-blue-600 border-blue-100',
+    'NO_SHOW': 'bg-gray-50 text-gray-500 border-gray-100',
+    'REJECTED': 'bg-rose-50 text-rose-600 border-rose-100',
   };
 
   return (
-    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${styles[status]}`}>
-      {status}
+    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${styles[status] || 'bg-gray-50 text-gray-500 border-gray-100'}`}>
+      {status ? status.replace('_', ' ') : 'UNKNOWN'}
     </span>
   );
 }

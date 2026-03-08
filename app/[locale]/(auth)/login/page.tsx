@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/nextInt/navigation';
+import { Link, useRouter } from '@/nextInt/navigation';
 import { usePathname } from 'next/navigation';
 import { Eye, EyeOff, MapPin, CheckCircle, Users, TrendingUp, Shield } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
+import { useToast } from '@/hooks/useToast';
 
 // ── Left Branding Panel ───────────────────────────────────────────────────────
 function BrandingPanel() {
@@ -101,6 +103,9 @@ function BrandingPanel() {
 function LoginForm() {
   const t = useTranslations('auth.login.form');
   const pathname = usePathname();
+  const router = useRouter();
+  const login = useAuthStore((state) => state.login);
+  const { error, success } = useToast();
 
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -111,8 +116,24 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
+    try {
+      await login({ email, password });
+      success(t('signingIn') || 'Success!');
+      
+      // Determine role from local state after login wait
+      const user = useAuthStore.getState().user;
+      if (user?.role === 'SUPER_ADMIN') {
+        router.push('/dashboard/super-admin');
+      } else if (user?.role === 'CONSULTANT') {
+        router.push('/dashboard/consultant');
+      } else {
+        router.push('/dashboard/user');
+      }
+    } catch (err: any) {
+      error(err.response?.data?.message || err.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -9,6 +9,7 @@
   },
   "dashboard": {
     "navigation": {
+      "header": "Main Menu",
       "user": {
         "myStatus": "My Status",
         "myCases": "My Cases",

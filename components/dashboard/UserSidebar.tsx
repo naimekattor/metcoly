@@ -9,16 +9,24 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 export default function UserSidebar() {
   const t = useTranslations('dashboard.user');
   const pathname = usePathname();
 
+  const { logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = '/';
+  };
+
   const navItems = [
     { href: '/dashboard/user', icon: LayoutDashboard, label: t('dashboard') },
     { href: '/dashboard/user/my-cases', icon: FolderOpen, label: t('myCases') },
     { href: '/dashboard/user/settings', icon: Settings, label: t('settings') },
-    { href: '/dashboard/user/logout', icon: LogOut, label: t('logout') },
+    // Removed LogOut active link to treat it independently
   ];
 
   return (
@@ -49,6 +57,14 @@ export default function UserSidebar() {
             </Link>
           );
         })}
+        {/* LOGOUT: Unified client-side logout to bypass routing middleware blocks */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg mt-2 transition text-red-600 hover:bg-red-50"
+        >
+          <LogOut size={20} />
+          <span>{t('logout')}</span>
+        </button>
       </nav>
     </aside>
   );

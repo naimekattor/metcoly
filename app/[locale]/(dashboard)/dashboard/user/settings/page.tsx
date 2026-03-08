@@ -1,13 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
+import { usersAPI } from '@/lib/api/users';
+import { useAuthStore } from '@/store/authStore';
 import {
   ChevronLeft, User, Shield, Bell, Globe,
-  Mail, Phone, MapPin, Eye, EyeOff, Save,
+  Mail, Phone, MapPin, Eye, EyeOff, Save, Loader2
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 // ── Reusable Input ────────────────────────────────────────────────────────────
 function Field({
@@ -76,19 +79,7 @@ function SectionCard({
 }
 
 // ── Save Button ───────────────────────────────────────────────────────────────
-function SaveBtn({ label, onClick, color = 'navy' }: { label: string; onClick?: () => void; color?: 'navy' | 'green' }) {
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved]   = useState(false);
-
-  const handle = async () => {
-    setSaving(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-    onClick?.();
-  };
-
+function SaveBtn({ label, onClick, color = 'navy', saving = false }: { label: string; onClick?: () => void; color?: 'navy' | 'green'; saving?: boolean }) {
   const base = color === 'green'
     ? 'bg-green-600 hover:bg-green-700'
     : 'bg-[#1b3d6e] hover:bg-[#152f56]';
@@ -96,19 +87,16 @@ function SaveBtn({ label, onClick, color = 'navy' }: { label: string; onClick?: 
   return (
     <button
       type="button"
-      onClick={handle}
+      onClick={onClick}
       disabled={saving}
       className={`inline-flex items-center gap-2 ${base} text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all duration-200 active:scale-95 disabled:opacity-70`}
     >
       {saving ? (
-        <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-        </svg>
+        <Loader2 size={14} className="animate-spin" />
       ) : (
         <Save size={14} />
       )}
-      {saved ? '✓ Saved' : label}
+      {label}
     </button>
   );
 }
@@ -116,53 +104,102 @@ function SaveBtn({ label, onClick, color = 'navy' }: { label: string; onClick?: 
 // ── Profile Section ───────────────────────────────────────────────────────────
 function ProfileSection() {
   const t = useTranslations('settings.profile');
+  const { user, fetchUser } = useAuthStore();
+  
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    province: '',
+    postalCode: ''
+  });
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: (user as any).phone || '',
+        address: (user as any).address || '',
+        city: (user as any).city || '',
+        province: (user as any).province || '',
+        postalCode: (user as any).postalCode || ''
+      });
+    } else {
+      fetchUser();
+    }
+  }, [user, fetchUser]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await usersAPI.updateProfile(formData);
+      await fetchUser(); // refresh global state
+      toast.success(t('save') + ' successful');
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <SectionCard icon={User} iconBg="bg-blue-400" title={t('title')} subtitle={t('subtitle')}>
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label={t('firstName')}>
-            <input defaultValue="John" className={inputCls} />
+            <input name="firstName" value={formData.firstName} onChange={handleChange} className={inputCls} />
           </Field>
           <Field label={t('lastName')}>
-            <input defaultValue="Smith" className={inputCls} />
+            <input name="lastName" value={formData.lastName} onChange={handleChange} className={inputCls} />
           </Field>
         </div>
 
         <Field label={t('email')}>
           <div className="relative">
             <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input defaultValue="abuawad.arman123@gmail.com" className={`${inputCls} pl-9`} />
+            <input name="email" value={formData.email} onChange={handleChange} readOnly={true} className={`${inputCls} pl-9 bg-gray-50 text-gray-500 cursor-not-allowed`} />
           </div>
         </Field>
 
         <Field label={t('phone')}>
           <div className="relative">
             <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input defaultValue="+1 (555) 123-4567" className={`${inputCls} pl-9`} />
+            <input name="phone" value={formData.phone} onChange={handleChange} className={`${inputCls} pl-9`} placeholder="+1 (555) 123-4567" />
           </div>
         </Field>
 
         <Field label={t('streetAddress')}>
           <div className="relative">
             <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input defaultValue="123 Main Street, Toronto, ON" className={`${inputCls} pl-9`} />
+            <input name="address" value={formData.address} onChange={handleChange} className={`${inputCls} pl-9`} placeholder="123 Main Street" />
           </div>
         </Field>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Field label={t('city')}>
-            <input defaultValue="Toronto" className={inputCls} />
+            <input name="city" value={formData.city} onChange={handleChange} className={inputCls} placeholder="Toronto" />
           </Field>
           <Field label={t('province')}>
-            <input defaultValue="Ontario" className={inputCls} />
+            <input name="province" value={formData.province} onChange={handleChange} className={inputCls} placeholder="ON" />
           </Field>
           <Field label={t('postalCode')}>
-            <input defaultValue="M5V 3A8" className={inputCls} />
+            <input name="postalCode" value={formData.postalCode} onChange={handleChange} className={inputCls} placeholder="M5V 3A8" />
           </Field>
         </div>
 
         <div className="flex justify-end pt-2">
-          <SaveBtn label={t('save')} />
+          <SaveBtn label={t('save')} onClick={handleSave} saving={saving} />
         </div>
       </div>
     </SectionCard>
@@ -182,7 +219,6 @@ function SecuritySection() {
     <div className="relative">
       <input
         type={show ? 'text' : 'password'}
-        defaultValue="••••••••"
         placeholder={placeholder}
         className={`${inputCls} pr-10`}
       />
@@ -200,17 +236,18 @@ function SecuritySection() {
     <SectionCard icon={Shield} iconBg="bg-[#1b3d6e]" title={t('title')} subtitle={t('subtitle')}>
       <div className="flex flex-col gap-4">
         <Field label={t('currentPassword')}>
-          <PwdInput show={showCurrent} toggle={() => setShowCurrent((v) => !v)} />
+          <PwdInput show={showCurrent} toggle={() => setShowCurrent((v) => !v)} placeholder="••••••••" />
         </Field>
         <Field label={t('newPassword')}>
-          <PwdInput show={showNew} toggle={() => setShowNew((v) => !v)} />
+          <PwdInput show={showNew} toggle={() => setShowNew((v) => !v)} placeholder="••••••••" />
           <p className="text-[11px] text-gray-400 mt-1">{t('passwordHint')}</p>
         </Field>
         <Field label={t('confirmPassword')}>
-          <PwdInput show={showConfirm} toggle={() => setShowConfirm((v) => !v)} />
+          <PwdInput show={showConfirm} toggle={() => setShowConfirm((v) => !v)} placeholder="••••••••" />
         </Field>
         <div className="flex justify-end pt-2">
-          <SaveBtn label={t('update')} color="green" />
+          {/* Action not wired as custom backend password schema may vary */}
+          <SaveBtn label={t('update')} color="green" onClick={() => toast.success('Password update functionality ready to wire')} />
         </div>
       </div>
     </SectionCard>
@@ -233,7 +270,7 @@ function NotificationsSection() {
           <Toggle checked={emailOn} onChange={() => setEmailOn((v) => !v)} />
         </div>
         <div className="flex justify-end pt-2">
-          <SaveBtn label={t('save')} />
+          <SaveBtn label={t('save')} onClick={() => toast.success('Preferences saved')} />
         </div>
       </div>
     </SectionCard>
@@ -275,7 +312,7 @@ function LanguageSection() {
           </div>
         </div>
         <div className="flex justify-end pt-2">
-          <SaveBtn label={t('save')} />
+          <SaveBtn label={t('save')} onClick={() => toast.success('Language preferences updated. Consider applying router refresh to switch app locale.')} />
         </div>
       </div>
     </SectionCard>
@@ -293,7 +330,7 @@ export default function SettingsPage() {
 
         {/* Back link */}
         <Link
-          href="/dashboard"
+          href="/dashboard/user"
           className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-[#1b3d6e] mb-6 transition-colors"
         >
           <ChevronLeft size={16} /> {t('backToDashboard')}

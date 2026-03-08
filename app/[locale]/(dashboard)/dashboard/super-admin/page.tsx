@@ -16,51 +16,12 @@ import {
   Filter,
   Search
 } from 'lucide-react';
-import Link from 'next/link';
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-
-// ── Mock Data ─────────────────────────────────────────────────────────────────
-
-const STATS = [
-  { label: 'Total Revenue', value: '$128,430', change: '+12.5%', icon: DollarSign, trend: 'up' },
-  { label: 'Total Users', value: '2,845', change: '+8.2%', icon: Users, trend: 'up' },
-  { label: 'Total Consultants', value: '42', change: '+4.1%', icon: UserCheck, trend: 'up' },
-  { label: 'Active Bookings', value: '156', change: '-2.4%', icon: Calendar, trend: 'down' },
-];
-
-const REVENUE_DATA = [
-  { month: 'Jul', value: 45000 },
-  { month: 'Aug', value: 52000 },
-  { month: 'Sep', value: 48000 },
-  { month: 'Oct', value: 61000 },
-  { month: 'Nov', value: 55000 },
-  { month: 'Dec', value: 67000 },
-  { month: 'Jan', value: 72000 },
-  { month: 'Feb', value: 81000 },
-];
-
-const APPLICATION_STATUS = [
-  { label: 'Approved', count: 845, percentage: 65, color: '#10b981' },
-  { label: 'Pending', count: 184, percentage: 15, color: '#f59e0b' },
-  { label: 'Under Review', count: 122, percentage: 10, color: '#3b82f6' },
-  { label: 'Rejected', count: 104, percentage: 10, color: '#ef4444' },
-];
-
-const RECENT_BOOKINGS = [
-  { id: 'BK-8821', client: 'Sarah Johnson', consultant: 'Marc Davies', date: 'Mar 05, 2026', time: '10:00 AM', status: 'Approved' },
-  { id: 'BK-8822', client: 'Ahmed Khan', consultant: 'Elena Popa', date: 'Mar 05, 2026', time: '11:30 AM', status: 'Pending' },
-  { id: 'BK-8823', client: 'Sophie Chen', consultant: 'Marc Davies', date: 'Mar 06, 2026', time: '02:00 PM', status: 'Completed' },
-  { id: 'BK-8824', client: 'John Brown', consultant: 'Robert Fox', date: 'Mar 06, 2026', time: '04:00 PM', status: 'No Show' },
-  { id: 'BK-8825', client: 'Maria Garcia', consultant: 'Elena Popa', date: 'Mar 07, 2026', time: '09:00 AM', status: 'Rejected' },
-];
-
-const RECENT_APPLICATIONS = [
-  { id: 'APP-102', client: 'James Wilson', type: 'Study Permit', country: 'Canada', date: 'Mar 04, 2026', status: 'Under Review' },
-  { id: 'APP-101', client: 'Linda Smith', type: 'Work Permit', country: 'UK', date: 'Mar 04, 2026', status: 'Approved' },
-  { id: 'APP-100', client: 'Kevin Lee', type: 'Express Entry', country: 'Canada', date: 'Mar 03, 2026', status: 'Under Review' },
-  { id: 'APP-099', client: 'Emma Davis', type: 'Sponsorship', country: 'Australia', date: 'Mar 02, 2026', status: 'Approved' },
-];
+import { useState, useEffect } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { Link } from '@/nextInt/navigation';
+import { analyticsAPI } from '@/lib/api/analytics';
+import { bookingsAPI } from '@/lib/api/bookings';
+import { applicationsAPI } from '@/lib/api/applications';
 
 // ── Components ───────────────────────────────────────────────────────────────
 
@@ -82,18 +43,53 @@ const item = {
 export default function SuperAdminDashboard() {
   const t = useTranslations('superAdmin.overview');
   const [bookingFilter, setBookingFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [revenueTrend, setRevenueTrend] = useState<any[]>([]);
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
+  const [recentApplications, setRecentApplications] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [statsRes, revRes, bookingsRes, appsRes] = await Promise.all([
+          analyticsAPI.getDashboardStats(),
+          analyticsAPI.getRevenueAnalytics(),
+          bookingsAPI.getAllBookings({ limit: 5 }),
+          applicationsAPI.getAllApplications({ limit: 4 })
+        ]);
+
+        setDashboardData(statsRes.data);
+        setRevenueTrend((revRes.data?.revenueByPeriod || []).map((r: any) => ({
+          month: r.period,
+          value: Number(r.total_amount)
+        })).reverse());
+        setRecentBookings(bookingsRes.data?.bookings || []);
+        setRecentApplications(appsRes.data?.applications || []);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
 
   const filteredBookings = bookingFilter === 'All' 
-    ? RECENT_BOOKINGS 
-    : RECENT_BOOKINGS.filter(b => b.status === bookingFilter);
+    ? recentBookings 
+    : recentBookings.filter(b => b.bookingStatus === bookingFilter.toUpperCase());
 
-  const maxRevenue = Math.max(...REVENUE_DATA.map(d => d.value));
+  const maxRevenue = Math.max(...revenueTrend.map(d => d.value), 1);
+
+  const overview = dashboardData?.overview || {};
+  const monthly = dashboardData?.monthly || {};
 
   const stats = [
-    { label: t('totalRevenue'), value: '$128,430', change: '+12.5%', icon: DollarSign, trend: 'up' },
-    { label: t('totalUsers'), value: '2,845', change: '+8.2%', icon: Users, trend: 'up' },
-    { label: t('totalConsultants'), value: '42', change: '+4.1%', icon: UserCheck, trend: 'up' },
-    { label: t('activeBookings'), value: '156', change: '-2.4%', icon: Calendar, trend: 'down' },
+    { label: t('totalRevenue'), value: `$${overview.totalRevenue || 0}`, change: `${monthly.revenueGrowth >= 0 ? '+' : ''}${monthly.revenueGrowth || 0}%`, icon: DollarSign, trend: monthly.revenueGrowth >= 0 ? 'up' : 'down' },
+    { label: t('totalUsers'), value: overview.totalUsers || 0, change: '+0%', icon: Users, trend: 'up' },
+    { label: t('totalConsultants'), value: overview.totalConsultants || 0, change: '+0%', icon: UserCheck, trend: 'up' },
+    { label: t('activeBookings'), value: overview.totalBookings || 0, change: '+0%', icon: Calendar, trend: 'up' },
   ];
 
   return (
@@ -135,16 +131,20 @@ export default function SuperAdminDashboard() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h3 className="text-lg font-bold text-gray-900">{t('revenueGrowth')}</h3>
-              <p className="text-sm text-gray-400">Total revenue increase of 12% from last month</p>
+              <p className="text-sm text-gray-400">Total revenue growth from last month: {monthly.revenueGrowth || 0}%</p>
             </div>
             <select className="text-xs bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 outline-none">
-              <option>Last 8 Months</option>
-              <option>Last Year</option>
+              <option>Recent Trend</option>
             </select>
           </div>
           
-          <div className="flex-1 flex items-end justify-between gap-2 sm:gap-4 h-64 px-2">
-            {REVENUE_DATA.map((data, idx) => {
+          <div className="flex-1 flex items-end justify-between gap-2 sm:gap-4 h-64 px-2 relative">
+            {revenueTrend.length === 0 && !loading && (
+              <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+                No revenue data available.
+              </div>
+            )}
+            {revenueTrend.map((data, idx) => {
               const heightPercentage = (data.value / maxRevenue) * 100;
               return (
                 <div key={idx} className="flex-1 flex flex-col items-center gap-3">
@@ -175,10 +175,12 @@ export default function SuperAdminDashboard() {
           
           <div className="space-y-6">
             {[
-              { label: t('appBreakdown.stats.approved'), count: 845, percentage: 65, color: '#10b981' },
-              { label: t('appBreakdown.stats.inReview'), count: 184, percentage: 15, color: '#3b82f6' },
-              { label: t('appBreakdown.stats.rejected'), count: 104, percentage: 10, color: '#ef4444' },
-            ].map((status, idx) => (
+              { label: t('appBreakdown.stats.approved'), count: dashboardData?.applicationsByStatus?.APPROVED || 0, color: '#10b981' },
+              { label: t('appBreakdown.stats.inReview'), count: (dashboardData?.applicationsByStatus?.UNDER_REVIEW || 0) + (dashboardData?.applicationsByStatus?.SUBMITTED || 0), color: '#3b82f6' },
+              { label: t('appBreakdown.stats.rejected'), count: dashboardData?.applicationsByStatus?.REJECTED || 0, color: '#ef4444' },
+            ].map((status, idx) => {
+              const percentage = overview.totalApplications ? Math.round((status.count / overview.totalApplications) * 100) : 0;
+              return (
               <div key={idx} className="space-y-2">
                 <div className="flex justify-between items-end">
                   <span className="text-sm font-bold text-gray-700">{status.label}</span>
@@ -187,14 +189,14 @@ export default function SuperAdminDashboard() {
                 <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${status.percentage}%` }}
+                    animate={{ width: `${percentage}%` }}
                     transition={{ duration: 1, delay: idx * 0.2, ease: 'easeOut' }}
                     style={{ backgroundColor: status.color }}
                     className="h-full rounded-full"
                   />
                 </div>
               </div>
-            ))}
+            )})}
           </div>
           
           <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
@@ -244,13 +246,13 @@ export default function SuperAdminDashboard() {
                   <tr key={idx} className="hover:bg-gray-50/80 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-900">{booking.client}</span>
-                        <span className="text-[10px] text-gray-400">{booking.date} at {booking.time}</span>
+                        <span className="text-sm font-bold text-gray-900">{booking.client?.firstName} {booking.client?.lastName}</span>
+                        <span className="text-[10px] text-gray-400">{new Date(booking.startTime).toLocaleString()}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-600">{booking.consultant}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-600">{booking.consultant?.firstName} {booking.consultant?.lastName}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={booking.status} />
+                      <StatusBadge status={booking.bookingStatus} />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-gray-400">
                       <button className="p-2 hover:bg-white rounded-lg hover:text-[#0F2A4D] transition-colors">
@@ -294,17 +296,17 @@ export default function SuperAdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {RECENT_APPLICATIONS.map((app, idx) => (
+                {recentApplications.map((app, idx) => (
                   <tr key={idx} className="hover:bg-gray-50/80 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-900">{app.id}</span>
-                        <span className="text-[10px] text-gray-400">{app.type}</span>
+                        <span className="text-sm font-bold text-gray-900">{app.applicationNumber || app.id.substring(0, 8)}</span>
+                        <span className="text-[10px] text-gray-400">{app.service?.name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-700">{app.client}</span>
+                        <span className="text-sm font-medium text-gray-700">{app.client?.firstName} {app.client?.lastName}</span>
                         <span className="text-[10px] text-gray-400">{app.country}</span>
                       </div>
                     </td>
@@ -334,17 +336,19 @@ export default function SuperAdminDashboard() {
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
-    'Approved': 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    'Pending': 'bg-amber-50 text-amber-600 border-amber-100',
-    'Completed': 'bg-blue-50 text-blue-600 border-blue-100',
-    'No Show': 'bg-gray-50 text-gray-500 border-gray-100',
-    'Rejected': 'bg-rose-50 text-rose-600 border-rose-100',
-    'Under Review': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+    'APPROVED': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    'CONFIRMED': 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    'PENDING': 'bg-amber-50 text-amber-600 border-amber-100',
+    'COMPLETED': 'bg-blue-50 text-blue-600 border-blue-100',
+    'NO_SHOW': 'bg-gray-50 text-gray-500 border-gray-100',
+    'REJECTED': 'bg-rose-50 text-rose-600 border-rose-100',
+    'UNDER_REVIEW': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+    'SUBMITTED': 'bg-indigo-50 text-indigo-600 border-indigo-100',
   };
 
   return (
-    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${styles[status]}`}>
-      {status}
+    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${styles[status] || 'bg-gray-50 text-gray-500 border-gray-100'}`}>
+      {status.replace('_', ' ')}
     </span>
   );
 }

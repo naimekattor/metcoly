@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { analyticsAPI } from '@/lib/api/analytics';
 
 const container = {
   hidden: { opacity: 0 },
@@ -37,16 +38,9 @@ export default function LogsPage() {
     const fetchLogs = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('token');
-        // Fetching all logs without role filter
-        const response = await fetch(`http://localhost:5000/api/analytics/logs`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        const data = await response.json();
-        if (data.status === 'success') {
-          setLogs(data.data.logs);
+        const res = await analyticsAPI.getActivityLogs();
+        if (res.status === 'success') {
+          setLogs(res.data?.logs || []);
         }
       } catch (error) {
         console.error('Error fetching logs:', error);

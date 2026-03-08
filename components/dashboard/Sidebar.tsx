@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { useAuthStore } from '@/store/authStore';
 
 interface SidebarProps {
   role?: 'user' | 'admin' | 'super_admin';
@@ -35,6 +36,13 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
   const t_super = useTranslations('superAdmin');
   const pathname = usePathname();
   const locale = useLocale();
+
+  const { logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = '/';
+  };
 
   // Track open sections for super admin
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -240,13 +248,13 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
           <HelpCircle size={20} />
           <span className="text-sm font-medium">{t('admin.reports') || 'Support'}</span>
         </Link> */}
-        <Link 
-          href="/dashboard/user/logout"
+        <button 
+          onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-xl transition-all mt-2"
         >
           <LogOut size={20} />
           <span className="text-sm font-medium">{useTranslations('navigation')('logout')}</span>
-        </Link>
+        </button>
       </div>
     </aside>
   );
