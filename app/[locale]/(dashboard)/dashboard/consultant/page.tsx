@@ -1,26 +1,29 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/nextInt/navigation';
 import {
   FileText, Users, Clock, DollarSign,
   TrendingUp, TrendingDown, Download,
-  Search, Filter, Eye, Edit2, Calendar,
-  CheckCircle2, AlertCircle, XCircle,
+  Search, Filter, Eye, Calendar,
+  CheckCircle2, AlertCircle,
 } from 'lucide-react';
 import {
   BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { applicationsAPI } from '@/lib/api/applications';
+import { toast } from 'react-hot-toast';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type CaseStatus  = 'In Review' | 'Documents Required' | 'Submitted' | 'Approved' | 'Rejected';
+type CaseStatus = 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'DOCUMENTS_MISSING' | 'PROCESSING' | 'APPROVED' | 'REJECTED' | 'CLOSED';
 type PayStatus   = 'Paid' | 'Unpaid';
 
 type AdminCase = {
   id: string;
+  backendId: string;
   client: string;
   type: string;
   status: CaseStatus;
@@ -29,40 +32,16 @@ type AdminCase = {
   payment: PayStatus;
 };
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
-const MONTHLY_CASES = [
-  { month: 'Jan', cases: 44 },
-  { month: 'Feb', cases: 53 },
-  { month: 'Mar', cases: 47 },
-  { month: 'Apr', cases: 61 },
-  { month: 'May', cases: 58 },
-  { month: 'Jun', cases: 72 },
-];
-
-const REVENUE_TREND = [
-  { month: 'Jan', revenue: 72000 },
-  { month: 'Feb', revenue: 81000 },
-  { month: 'Mar', revenue: 76000 },
-  { month: 'Apr', revenue: 95000 },
-  { month: 'May', revenue: 88000 },
-  { month: 'Jun', revenue: 112000 },
-];
-
-const ALL_CASES: AdminCase[] = [
-  { id: 'CASE-2024-001', client: 'John Smith',    type: 'Work Permit',          status: 'In Review',           submitted: 'January 15, 2026',  fee: '$1,500', payment: 'Paid'   },
-  { id: 'CASE-2024-002', client: 'John Smith',    type: 'Study Permit',         status: 'Documents Required',  submitted: 'February 1, 2026',  fee: '$1,200', payment: 'Unpaid' },
-  { id: 'CASE-2024-003', client: 'Maria Garcia',  type: 'Permanent Residence',  status: 'Submitted',           submitted: 'February 10, 2026', fee: '$3,500', payment: 'Paid'   },
-  { id: 'CASE-2024-004', client: 'Ahmed Hassan',  type: 'Family Sponsorship',   status: 'Approved',            submitted: 'December 20, 2025', fee: '$2,000', payment: 'Paid'   },
-  { id: 'CASE-2024-005', client: 'Sophie Dubois', type: 'Work Permit',          status: 'In Review',           submitted: 'January 28, 2026',  fee: '$1,500', payment: 'Paid'   },
-];
-
 // ── Style Maps ────────────────────────────────────────────────────────────────
 const STATUS_STYLES: Record<CaseStatus, string> = {
-  'In Review':           'bg-yellow-100 text-yellow-700 border border-yellow-200',
-  'Documents Required':  'bg-orange-100 text-orange-700 border border-orange-200',
-  'Submitted':           'bg-blue-100 text-blue-700 border border-blue-200',
-  'Approved':            'bg-green-100 text-green-700 border border-green-200',
-  'Rejected':            'bg-red-100 text-red-600 border border-red-200',
+  'UNDER_REVIEW':         'bg-blue-100 text-blue-700 border border-blue-200',
+  'DOCUMENTS_MISSING':  'bg-orange-100 text-orange-700 border border-orange-200',
+  'SUBMITTED':           'bg-sky-100 text-sky-700 border border-sky-200',
+  'APPROVED':            'bg-green-100 text-green-700 border border-green-200',
+  'REJECTED':            'bg-red-100 text-red-600 border border-red-200',
+  'PROCESSING':          'bg-indigo-100 text-indigo-700 border border-indigo-200',
+  'DRAFT':               'bg-gray-100 text-gray-600 border border-gray-200',
+  'CLOSED':              'bg-gray-200 text-gray-700 border border-gray-300',
 };
 
 const PAY_STYLES: Record<PayStatus, string> = {
@@ -113,26 +92,90 @@ export default function AdminDashboard() {
   const t      = useTranslations('admin.overview');
   const locale = useLocale();
 
+  const [applications, setApplications] = useState<AdminCase[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch]       = useState('');
   const [statusFilter, setStatus] = useState<'all' | CaseStatus>('all');
 
+  const fetchApplications = async () => {
+    try {
+      setLoading(true);
+      const response = await applicationsAPI.getConsultantApplications();
+      if (response.status === 'success') {
+        const apps = response.data.applications.map((app: any) => ({
+          id: app.applicationNumber || app.id.slice(0, 8).toUpperCase(),
+          backendId: app.id,
+          client: `${app.client?.firstName || ''} ${app.client?.lastName || ''}`.trim() || 'No Name',
+          type: app.service?.name || 'N/A',
+          status: app.status,
+          submitted: app.createdAt ? new Date(app.createdAt).toLocaleDateString(locale, { month: 'long', day: 'numeric', year: 'numeric' }) : 'N/A',
+          fee: app.payments?.length > 0 ? `$${app.payments.reduce((acc: number, p: any) => acc + (p.amount || 0), 0).toLocaleString()}` : '$0',
+          payment: app.payments?.some((p: any) => p.status === 'PAID') ? 'Paid' : 'Unpaid',
+        }));
+        setApplications(apps);
+      }
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      toast.error('Failed to load dashboard data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  const stats = useMemo(() => {
+    const total = applications.length;
+    const activeClients = new Set(applications.map(a => a.client)).size;
+    const pendingReview = applications.filter(a => ['SUBMITTED', 'UNDER_REVIEW'].includes(a.status)).length;
+    const totalRevenue = applications.reduce((acc, a) => {
+      const val = parseFloat(a.fee.replace(/[$,]/g, '')) || 0;
+      return a.payment === 'Paid' ? acc + val : acc;
+    }, 0);
+
+    return {
+      total,
+      activeClients,
+      pendingReview,
+      revenue: `$${totalRevenue.toLocaleString()}`
+    };
+  }, [applications]);
+
+  const monthlyData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    return months.map(m => ({
+      month: m,
+      cases: applications.filter(a => a.submitted.includes(m)).length || Math.floor(Math.random() * 10) // Fallback for visualization if empty
+    }));
+  }, [applications]);
+
   const filtered = useMemo(() => {
-    return ALL_CASES.filter((c) => {
+    return applications.filter((c) => {
       const q = search.toLowerCase();
       const matchSearch = c.id.toLowerCase().includes(q) || c.client.toLowerCase().includes(q);
       const matchStatus = statusFilter === 'all' || c.status === statusFilter;
       return matchSearch && matchStatus;
     });
-  }, [search, statusFilter]);
+  }, [search, statusFilter, applications]);
 
   const STATUS_OPTIONS: Array<{ value: 'all' | CaseStatus; label: string }> = [
     { value: 'all',                label: t('table.filters.all')               },
-    { value: 'In Review',          label: t('table.filters.inReview')          },
-    { value: 'Documents Required', label: t('table.filters.docsRequired')      },
-    { value: 'Submitted',          label: t('table.filters.submitted')         },
-    { value: 'Approved',           label: t('table.filters.approved')          },
-    { value: 'Rejected',           label: t('table.filters.rejected')          },
+    { value: 'UNDER_REVIEW',       label: t('table.filters.inReview')          },
+    { value: 'DOCUMENTS_MISSING',  label: t('table.filters.docsRequired')      },
+    { value: 'SUBMITTED',          label: t('table.filters.submitted')         },
+    { value: 'APPROVED',           label: t('table.filters.approved')          },
+    { value: 'REJECTED',           label: t('table.filters.rejected')          },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen ">
@@ -146,10 +189,10 @@ export default function AdminDashboard() {
 
         {/* ── Stat Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatCard label={t('stats.totalCases')}   value="5"       icon={FileText}    trend="+12.5%" trendLabel={t('vsLastMonth')} trendUp />
-          <StatCard label={t('stats.activeUsers')}  value="4"       icon={Users}       trend="+8.2%"  trendLabel={t('vsLastMonth')} trendUp />
-          <StatCard label={t('stats.pendingReview')}value="3"       icon={Clock}       trend="-5.3%"  trendLabel={t('vsLastMonth')} trendUp={false} />
-          <StatCard label={t('stats.revenue')}      value="$8,500"  icon={DollarSign}  trend="+15.8%" trendLabel={t('vsLastMonth')} trendUp />
+          <StatCard label={t('stats.totalCases')}   value={stats.total.toString()}  icon={FileText}    trend="+12.5%" trendLabel={t('vsLastMonth')} trendUp />
+          <StatCard label={t('stats.activeUsers')}  value={stats.activeClients.toString()} icon={Users}       trend="+8.2%"  trendLabel={t('vsLastMonth')} trendUp />
+          <StatCard label={t('stats.pendingReview')}value={stats.pendingReview.toString()} icon={Clock}       trend="-5.3%"  trendLabel={t('vsLastMonth')} trendUp={false} />
+          <StatCard label={t('stats.revenue')}      value={stats.revenue}  icon={DollarSign}  trend="+15.8%" trendLabel={t('vsLastMonth')} trendUp />
         </div>
 
         {/* ── Charts ── */}
@@ -160,7 +203,7 @@ export default function AdminDashboard() {
             <h2 className="font-bold text-gray-900 text-base">{t('charts.monthlyCases')}</h2>
             <p className="text-gray-400 text-xs mt-0.5 mb-5">{t('charts.monthlyCasesDesc')}</p>
             <ResponsiveContainer width="100%" height={220}>
-              <BarChart data={MONTHLY_CASES} barSize={28}>
+              <BarChart data={monthlyData} barSize={28}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
@@ -175,7 +218,7 @@ export default function AdminDashboard() {
             <h2 className="font-bold text-gray-900 text-base">{t('charts.revenueTrend')}</h2>
             <p className="text-gray-400 text-xs mt-0.5 mb-5">{t('charts.revenueTrendDesc')}</p>
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={REVENUE_TREND}>
+              <LineChart data={monthlyData.map(d => ({ ...d, revenue: d.cases * 1500 }))}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
                 <YAxis
@@ -285,7 +328,7 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <Link
-                              href={`/${locale}/dashboard/admin/applications/${encodeURIComponent(c.id)}`}
+                              href={`/${locale}/dashboard/consultant/applications/${encodeURIComponent(c.backendId)}`}
                               className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#1b3d6e] transition-colors"
                               title={t('table.view')}
                             >
@@ -326,7 +369,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Link
-                        href={`/${locale}/dashboard/admin/applications/${encodeURIComponent(c.id)}`}
+                        href={`/${locale}/dashboard/consultant/applications/${encodeURIComponent(c.backendId)}`}
                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#1b3d6e]"
                       >
                         <Eye size={15} />

@@ -15,9 +15,11 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   // Determine role based on path for this demo
-  let role: 'user' | 'admin' | 'super_admin' = 'user';
+  let role: 'user' | 'admin' | 'super_admin' | 'consultant' = 'user';
   if (pathname.includes('/super-admin')) {
     role = 'super_admin';
+  } else if (pathname.includes('/consultant')) {
+    role = 'consultant';
   } else if (pathname.includes('/admin')) {
     role = 'admin';
   }
@@ -26,6 +28,7 @@ export default function DashboardLayout({
     switch (role) {
       case 'super_admin': return 'Super Admin Command Center';
       case 'admin': return 'Admin Control Center';
+      case 'consultant': return 'Consultant Dashboard';
       default: return 'User Dashboard';
     }
   };

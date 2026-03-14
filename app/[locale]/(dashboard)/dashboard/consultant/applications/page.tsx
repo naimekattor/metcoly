@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/nextInt/navigation';
 import {
@@ -9,14 +9,17 @@ import {
   ChevronLeft, ChevronRight, ArrowUpDown,
   FileText, Users, Clock, XCircle,
 } from 'lucide-react';
+import { applicationsAPI } from '@/lib/api/applications';
+import { toast } from 'react-hot-toast';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type CaseStatus  = 'In Review' | 'Documents Required' | 'Submitted' | 'Approved' | 'Rejected';
+type CaseStatus  = 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'DOCUMENTS_MISSING' | 'PROCESSING' | 'APPROVED' | 'REJECTED' | 'CLOSED' ;
 type PayStatus   = 'Paid' | 'Unpaid' | 'Partial';
 type Priority    = 'High' | 'Medium' | 'Low';
 
 type AdminCase = {
   id: string;
+  backendId: string;
   client: string;
   email: string;
   type: string;
@@ -29,27 +32,18 @@ type AdminCase = {
   consultant: string;
 };
 
-// ── Mock Data ─────────────────────────────────────────────────────────────────
-const ALL_CASES: AdminCase[] = [
-  { id: 'CASE-2024-001', client: 'John Smith',      email: 'john.smith@email.com',     type: 'Work Permit',         status: 'In Review',          priority: 'High',   submitted: '2026-01-15', lastUpdate: '2026-02-20', fee: '$1,500', payment: 'Paid',    consultant: 'Sarah Johnson'   },
-  { id: 'CASE-2024-002', client: 'John Smith',      email: 'john.smith@email.com',     type: 'Study Permit',        status: 'Documents Required', priority: 'High',   submitted: '2026-02-01', lastUpdate: '2026-02-22', fee: '$1,200', payment: 'Unpaid',  consultant: 'Michael Chen'    },
-  { id: 'CASE-2024-003', client: 'Maria Garcia',    email: 'maria.garcia@email.com',   type: 'Permanent Residence', status: 'Submitted',           priority: 'Medium', submitted: '2026-02-10', lastUpdate: '2026-02-18', fee: '$3,500', payment: 'Paid',    consultant: 'Sarah Johnson'   },
-  { id: 'CASE-2024-004', client: 'Ahmed Hassan',    email: 'ahmed.hassan@email.com',   type: 'Family Sponsorship',  status: 'Approved',            priority: 'Low',    submitted: '2025-12-20', lastUpdate: '2026-02-15', fee: '$2,000', payment: 'Paid',    consultant: 'Emily Rodriguez' },
-  { id: 'CASE-2024-005', client: 'Sophie Dubois',   email: 'sophie.d@email.com',       type: 'Work Permit',         status: 'In Review',           priority: 'Medium', submitted: '2026-01-28', lastUpdate: '2026-02-21', fee: '$1,500', payment: 'Paid',    consultant: 'Michael Chen'    },
-  { id: 'CASE-2024-006', client: 'Liang Wei',       email: 'liang.wei@email.com',      type: 'Study Permit',        status: 'Approved',            priority: 'Low',    submitted: '2026-01-05', lastUpdate: '2026-02-10', fee: '$1,200', payment: 'Paid',    consultant: 'Sarah Johnson'   },
-  { id: 'CASE-2024-007', client: 'Priya Sharma',    email: 'priya.sharma@email.com',   type: 'Visitor Visa',        status: 'Rejected',            priority: 'Low',    submitted: '2026-01-20', lastUpdate: '2026-02-05', fee: '$800',  payment: 'Partial', consultant: 'Emily Rodriguez' },
-  { id: 'CASE-2024-008', client: 'Carlos Mendez',   email: 'carlos.m@email.com',       type: 'Work Permit',         status: 'Documents Required',  priority: 'High',   submitted: '2026-02-12', lastUpdate: '2026-02-23', fee: '$1,500', payment: 'Unpaid',  consultant: 'Michael Chen'    },
-  { id: 'CASE-2024-009', client: 'Fatima Al-Zahra', email: 'fatima.az@email.com',      type: 'Permanent Residence', status: 'In Review',           priority: 'Medium', submitted: '2026-01-30', lastUpdate: '2026-02-19', fee: '$3,500', payment: 'Partial', consultant: 'Sarah Johnson'   },
-  { id: 'CASE-2024-010', client: 'David Kim',       email: 'david.kim@email.com',      type: 'Family Sponsorship',  status: 'Submitted',           priority: 'Medium', submitted: '2026-02-08', lastUpdate: '2026-02-17', fee: '$2,000', payment: 'Paid',    consultant: 'Emily Rodriguez' },
-];
-
 // ── Style Maps ────────────────────────────────────────────────────────────────
-const STATUS_STYLES: Record<CaseStatus, string> = {
+const STATUS_STYLES: Record<string, string> = {
   'In Review':           'bg-yellow-50 text-yellow-700 border border-yellow-200',
+  'UNDER_REVIEW':         'bg-yellow-50 text-yellow-700 border border-yellow-200',
   'Documents Required':  'bg-orange-50 text-orange-700 border border-orange-200',
-  'Submitted':           'bg-blue-50 text-blue-700 border border-blue-200',
-  'Approved':            'bg-green-50 text-green-700 border border-green-200',
-  'Rejected':            'bg-red-50 text-red-600 border border-red-200',
+  'DOCUMENTS_MISSING':   'bg-orange-50 text-orange-700 border border-orange-200',
+  'SUBMITTED':           'bg-blue-50 text-blue-700 border border-blue-200',
+  'APPROVED':            'bg-green-50 text-green-700 border border-green-200',
+  'REJECTED':            'bg-red-50 text-red-600 border border-red-200',
+  'PROCESSING':          'bg-indigo-50 text-indigo-700 border border-indigo-200',
+  'DRAFT':               'bg-gray-50 text-gray-600 border border-gray-200',
+  'CLOSED':              'bg-gray-100 text-gray-700 border border-gray-300',
 };
 
 const PRIORITY_STYLES: Record<Priority, string> = {
@@ -116,20 +110,54 @@ export default function AdminCasesPage() {
   const locale = useLocale();
 
   const [search, setSearch]           = useState('');
-  const [statusFilter, setStatus]     = useState<'all' | CaseStatus>('all');
+  const [statusFilter, setStatus]     = useState<'all' | string>('all');
   const [typeFilter, setType]         = useState('all');
   const [page, setPage]               = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [cases, setCases]             = useState(ALL_CASES);
+  const [cases, setCases]             = useState<AdminCase[]>([]);
+  const [loading, setLoading]         = useState(true);
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        setLoading(true);
+        const response = await applicationsAPI.getConsultantApplications();
+        if (response.status === 'success') {
+          const mappedCases: AdminCase[] = response.data.applications.map((app: any) => ({
+            id: app.applicationNumber || app.id.slice(0, 8).toUpperCase(),
+            backendId: app.id,
+            client: `${app.client?.firstName || ''} ${app.client?.lastName || ''}`.trim() || 'No Name',
+            email: app.client?.email || 'N/A',
+            type: app.service?.name || 'N/A',
+            status: app.status,
+            priority: 'Medium',
+            submitted: app.createdAt ? new Date(app.createdAt).toISOString().split('T')[0] : 'N/A',
+            lastUpdate: app.updatedAt ? new Date(app.updatedAt).toISOString().split('T')[0] : 'N/A',
+            fee: app.service?.basePrice ? `$${app.service.basePrice}` : 'N/A',
+            payment: 'Unpaid',
+            consultant: 'Me',
+          }));
+          setCases(mappedCases);
+        }
+      } catch (error: any) {
+        console.error('Error fetching applications:', error);
+        toast.error('Failed to load applications');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
 
   // Derived stats
   const total       = cases.length;
-  const inReview    = cases.filter((c) => c.status === 'In Review').length;
-  const approved    = cases.filter((c) => c.status === 'Approved').length;
-  const rejected    = cases.filter((c) => c.status === 'Rejected').length;
+  const inReview    = cases.filter((c) => c.status === 'UNDER_REVIEW').length;
+  const approved    = cases.filter((c) => c.status === 'APPROVED').length;
+  const rejected    = cases.filter((c) => c.status === 'REJECTED').length;
 
   // Unique types for filter
-  const caseTypes = ['all', ...Array.from(new Set(ALL_CASES.map((c) => c.type)))];
+  const caseTypes = useMemo(() => ['all', ...Array.from(new Set(cases.map((c) => c.type)))], [cases]);
 
   // Filtered + paginated
   const filtered = useMemo(() => {
@@ -138,8 +166,7 @@ export default function AdminCasesPage() {
       const matchSearch =
         c.id.toLowerCase().includes(q) ||
         c.client.toLowerCase().includes(q) ||
-        c.email.toLowerCase().includes(q) ||
-        c.consultant.toLowerCase().includes(q);
+        c.email.toLowerCase().includes(q);
       const matchStatus = statusFilter === 'all' || c.status === statusFilter;
       const matchType   = typeFilter === 'all' || c.type === typeFilter;
       return matchSearch && matchStatus && matchType;
@@ -153,16 +180,20 @@ export default function AdminCasesPage() {
     if (deleteTarget) {
       setCases((prev) => prev.filter((c) => c.id !== deleteTarget));
       setDeleteTarget(null);
+      toast.success('Application removed from view');
     }
   };
 
-  const STATUS_OPTIONS: Array<{ value: 'all' | CaseStatus; label: string }> = [
+  const STATUS_OPTIONS: Array<{ value: 'all' | string; label: string }> = [
     { value: 'all',                label: t('filters.allStatus')           },
-    { value: 'In Review',          label: t('status.inReview')            },
-    { value: 'Documents Required', label: t('status.docsRequired')   },
-    { value: 'Submitted',          label: t('status.submitted')            },
-    { value: 'Approved',           label: t('status.approved')             },
-    { value: 'Rejected',           label: t('status.rejected')             },
+    { value: 'DRAFT',              label: 'Draft'                        },
+    { value: 'SUBMITTED',          label: t('status.submitted')            },
+    { value: 'UNDER_REVIEW',       label: t('status.inReview')            },
+    { value: 'DOCUMENTS_MISSING',  label: t('status.docsRequired')   },
+    { value: 'PROCESSING',         label: 'Processing'                   },
+    { value: 'APPROVED',           label: t('status.approved')             },
+    { value: 'REJECTED',           label: t('status.rejected')             },
+    { value: 'CLOSED',             label: 'Closed'                         },
   ];
 
   return (
@@ -289,11 +320,14 @@ export default function AdminCasesPage() {
                           <td className="px-5 py-3.5 text-gray-500 text-sm whitespace-nowrap">{c.type}</td>
                           <td className="px-5 py-3.5">
                             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${STATUS_STYLES[c.status]}`}>
-                              {c.status === 'In Review' && t('status.inReview')}
-                              {c.status === 'Documents Required' && t('status.docsRequired')}
-                              {c.status === 'Submitted' && t('status.submitted')}
-                              {c.status === 'Approved' && t('status.approved')}
-                              {c.status === 'Rejected' && t('status.rejected')}
+                              {c.status === 'UNDER_REVIEW' && t('status.inReview')}
+                              {c.status === 'DOCUMENTS_MISSING' && t('status.docsRequired')}
+                              {c.status === 'SUBMITTED' && t('status.submitted')}
+                              {c.status === 'APPROVED' && t('status.approved')}
+                              {c.status === 'REJECTED' && t('status.rejected')}
+                              {c.status === 'DRAFT' && 'Draft'}
+                              {c.status === 'PROCESSING' && 'Processing'}
+                              {c.status === 'CLOSED' && 'Closed'}
                             </span>
                           </td>
                           <td className="px-5 py-3.5">
@@ -317,8 +351,8 @@ export default function AdminCasesPage() {
                           <td className="px-5 py-3.5 text-gray-500 text-sm whitespace-nowrap">{c.consultant}</td>
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
-                              <Link
-                                href={`/dashboard/admin/applications/${encodeURIComponent(c.id)}`}
+                            <Link
+                                href={`/dashboard/consultant/applications/${encodeURIComponent(c.backendId)}`}
                                 className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-[#1b3d6e] transition-colors"
                                 title="View"
                               >
@@ -367,7 +401,7 @@ export default function AdminCasesPage() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Link
-                          href={`/dashboard/admin/applications/${encodeURIComponent(c.id)}`}
+                          href={`/dashboard/consultant/applications/${encodeURIComponent(c.backendId)}`}
                           className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#1b3d6e]">
                           <Eye size={15} />
                         </Link>

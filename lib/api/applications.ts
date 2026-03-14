@@ -29,8 +29,8 @@ export const applicationsAPI = {
         const response = await apiClient.patch(`/applications/${id}/submit`);
         return response.data;
     },
-    updateStatus: async (id: string, status: string, notes?: string) => {
-        const response = await apiClient.patch(`/applications/${id}/status`, { status, notes });
+    updateStatus: async (id: string, status: string, reason?: string) => {
+        const response = await apiClient.patch(`/applications/${id}/status`, { status, reason });
         return response.data;
     },
     assignConsultant: async (id: string, consultantId: string) => {

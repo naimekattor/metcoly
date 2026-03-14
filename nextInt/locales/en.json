@@ -182,6 +182,11 @@
     "applications": {
       "title": "Application Management",
       "subtitle": "Review and process all client immigration applications",
+      "actions": {
+        "approve": "Approve",
+        "reject": "Reject",
+        "edit": "Edit"
+      },
       "status": {
         "inReview": "In Review",
         "docsRequired": "Documents Required",
@@ -1025,7 +1030,7 @@
           }
         },
         "perks": {
-          "consultation": "Free Initial Consultation",
+          "consultation": "Consultation",
           "portal": "24/7 Online Portal",
           "vault": "Document Vault",
           "payment": "Flexible Payment Plans"

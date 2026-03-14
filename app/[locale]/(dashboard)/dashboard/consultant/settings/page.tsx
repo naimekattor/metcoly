@@ -8,8 +8,12 @@ import {
   Lock, Eye, EyeOff, CheckCircle, Clock, UploadCloud, Send, FileText,
   ToggleLeft, ToggleRight,
   ChevronDown,
-  DollarSign
+  DollarSign, Loader2
 } from 'lucide-react';
+import { authAPI } from '@/lib/api/auth';
+import { usersAPI } from '@/lib/api/users';
+import { toast } from 'react-hot-toast';
+import { useEffect } from 'react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Tab = 'profile' | 'security' | 'notifications' | 'preferences' | 'activity';
@@ -95,32 +99,58 @@ function ToggleSwitch({ label, checked, onChange, description }: { label: string
 
 
 // ── Profile Tab Content ───────────────────────────────────────────────────────
-function ProfileTabContent({ t }: { t: any }) {
+function ProfileTabContent({ t, user, onUpdate }: { t: any; user: any; onUpdate: () => void }) {
   const [formData, setFormData] = useState({
-    firstName: 'Admin',
-    lastName: 'User',
-    email: 'admin@example.com',
-    phoneNumber: '+1 (416) 555-0123',
-    position: 'Senior Immigration Consultant',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    phoneNumber: user?.phone || '',
+    position: 'Consultant',
     department: 'Case Management',
-    employeeID: 'EMP-001',
-    dateJoined: '2023-01-15',
-    professionalBio: 'Highly experienced immigration consultant with a proven track record in Canadian immigration processes. Specializing in Express Entry, PNP, and family sponsorship applications.',
-    streetAddress: '123 Bay Street',
-    city: 'Toronto',
-    province: 'Ontario',
-    postalCode: 'M5J 2R8',
+    employeeID: user?.id?.substring(0, 8).toUpperCase() || '',
+    dateJoined: user?.createdAt ? new Date(user.createdAt).toISOString().split('T')[0] : '',
+    professionalBio: '',
   });
+
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phoneNumber: user.phone || '',
+        position: 'Consultant',
+        department: 'Case Management',
+        employeeID: user.id?.substring(0, 8).toUpperCase() || '',
+        dateJoined: user.createdAt ? new Date(user.createdAt).toISOString().split('T')[0] : '',
+        professionalBio: '',
+      });
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    console.log('Profile Saved:', formData);
-    // In a real app, you would send this data to an API
-    alert('Profile information saved!');
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await usersAPI.updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phoneNumber
+      });
+      toast.success('Profile updated successfully!');
+      onUpdate();
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -184,9 +214,11 @@ function ProfileTabContent({ t }: { t: any }) {
       <div className="flex justify-end">
         <button
           onClick={handleSave}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-medium text-sm rounded-xl shadow-md hover:bg-[#1b3d6e] transition-colors"
+          disabled={saving}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white font-medium text-sm rounded-xl shadow-md hover:bg-[#1b3d6e] transition-colors disabled:opacity-50"
         >
-          <CheckCircle size={18} /> {t('profile.save')}
+          {saving ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />} 
+          {saving ? 'Saving...' : t('profile.save')}
         </button>
       </div>
     </div>
@@ -591,11 +623,30 @@ function ActivityTabContent({ t }: { t: any }) {
 export default function AdminProfilePage() {
   const t = useTranslations('admin.settings');
   const [activeTab, setActiveTab] = useState<Tab>('profile');
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchUser = async () => {
+    try {
+      setLoading(true);
+      const res = await authAPI.getMe();
+      setUser(res.data?.user || res.data);
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+      toast.error('Failed to load profile data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
       case 'profile':
-        return <ProfileTabContent t={t} />;
+        return <ProfileTabContent t={t} user={user} onUpdate={fetchUser} />;
       case 'security':
         return <SecurityTabContent t={t} />;
       case 'notifications':
@@ -605,9 +656,17 @@ export default function AdminProfilePage() {
       case 'activity':
         return <ActivityTabContent t={t} />;
       default:
-        return <ProfileTabContent t={t} />;
+        return <ProfileTabContent t={t} user={user} onUpdate={fetchUser} />;
     }
   };
+
+  if (loading && !user) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="animate-spin text-gray-400" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen  ">
@@ -625,7 +684,7 @@ export default function AdminProfilePage() {
         <div className="bg-white border border-gray-200 rounded-2xl p-6 flex flex-col sm:flex-row items-center sm:items-start gap-5 mb-8 shadow-sm">
           <div className="relative w-20 h-20 flex-shrink-0">
             <div className="w-full h-full rounded-full bg-[#1b3d6e] flex items-center justify-center text-white text-3xl font-bold">
-              AU
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
             </div>
             <button className="absolute bottom-0 right-0 bg-white rounded-full p-1.5 border border-gray-200 shadow-sm hover:bg-gray-50">
               <UploadCloud size={16} className="text-gray-500" />
@@ -633,17 +692,17 @@ export default function AdminProfilePage() {
           </div>
           <div className="flex-1 text-center sm:text-left">
             <div className="flex flex-col sm:flex-row items-center gap-2 mb-1">
-              <h2 className="text-xl font-bold text-gray-900">Admin User</h2>
-              <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">Admin</span>
-              <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full">Active</span>
+              <h2 className="text-xl font-bold text-gray-900">{user?.firstName} {user?.lastName}</h2>
+              <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">{user?.role}</span>
+              <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded-full">{user?.isActive ? 'Active' : 'Inactive'}</span>
             </div>
-            <p className="text-gray-600 text-sm mb-3">Senior Immigration Consultant</p>
+            <p className="text-gray-600 text-sm mb-3">Consultant</p>
             <div className="flex flex-wrap justify-center sm:justify-start items-center gap-x-5 gap-y-2 text-sm text-gray-500">
               <span className="flex items-center gap-1">
-                <Mail size={15} /> admin@example.com
+                <Mail size={15} /> {user?.email}
               </span>
               <span className="flex items-center gap-1">
-                <Phone size={15} /> +1 (416) 555-0123
+                <Phone size={15} /> {user?.phone || 'N/A'}
               </span>
               <span className="flex items-center gap-1">
                 <Briefcase size={15} /> Case Management
@@ -652,13 +711,10 @@ export default function AdminProfilePage() {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 text-center sm:text-right">
             <div>
-              <p className="text-2xl font-bold text-gray-900">156</p>
+              <p className="text-2xl font-bold text-gray-900">{user?._count?.assignedApplications || 0}</p>
               <p className="text-xs text-gray-500">Cases Managed</p>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-green-600">98%</p>
-              <p className="text-xs text-gray-500">Success Rate</p>
-            </div>
+            
           </div>
         </div>
 

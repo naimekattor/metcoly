@@ -182,6 +182,11 @@
     "applications": {
       "title": "Gestion des demandes",
       "subtitle": "Réviser et traiter toutes les demandes d'immigration des clients",
+      "actions": {
+        "approve": "Approuver",
+        "reject": "Rejeter",
+        "edit": "Modifier"
+      },
       "status": {
         "inReview": "En révision",
         "docsRequired": "Documents requis",

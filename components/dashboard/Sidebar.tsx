@@ -26,7 +26,7 @@ import Image from 'next/image';
 import { useAuthStore } from '@/store/authStore';
 
 interface SidebarProps {
-  role?: 'user' | 'admin' | 'super_admin';
+  role?: 'user' | 'admin' | 'super_admin' | 'consultant';
   onClose?: () => void;
 }
 
@@ -75,6 +75,12 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
         { icon: LayoutDashboard, label: t_admin('overview.title'), href: '/dashboard/admin' },
         { icon: ShieldCheck, label: t_admin('applications.title'), href: '/dashboard/admin/applications' },
         { icon: Settings, label: t_admin('settings.title'), href: '/dashboard/admin/settings' },
+      ]
+    : role === 'consultant'
+    ? [
+        { icon: LayoutDashboard, label: t_admin('overview.title'), href: '/dashboard/consultant' },
+        { icon: ShieldCheck, label: t_admin('applications.title'), href: '/dashboard/consultant/applications' },
+        { icon: Settings, label: t_admin('settings.title'), href: '/dashboard/consultant/settings' },
       ]
     : role === 'super_admin'
     ? [
@@ -150,7 +156,7 @@ export default function Sidebar({ role = 'user', onClose }: SidebarProps) {
       {/* ── NAVIGATION ── */}
       <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2 custom-scrollbar no-scrollbar">
         <div className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] px-3 mb-4">
-          {role === 'super_admin' ? t_super('navigation.header') : role === 'admin' ? t_admin('overview.title') : t('header')}
+          {role === 'super_admin' ? t_super('navigation.header') : (role === 'admin' || role === 'consultant') ? t_admin('overview.title') : t('header')}
         </div>
         
         {menuItems.map((item: any) => {

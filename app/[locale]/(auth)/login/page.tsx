@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/nextInt/navigation';
 import { usePathname } from 'next/navigation';
-import { Eye, EyeOff, MapPin, CheckCircle, Users, TrendingUp, Shield } from 'lucide-react';
+import { Eye, EyeOff, MapPin, CheckCircle, Users, TrendingUp, Shield, ArrowLeft } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useToast } from '@/hooks/useToast';
 
@@ -31,6 +31,10 @@ function BrandingPanel() {
 
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-between h-full p-10">
+        <Link href="/" className="flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-4 py-1.5 w-fit">
+                         <span className='text-white'><ArrowLeft/></span> 
+                      <p className='text-white'> Back to home</p>
+                          </Link>
 
         {/* Top badge */}
         <div className="inline-flex items-center gap-2 bg-white/15 border border-white/20 rounded-full px-4 py-1.5 w-fit">
