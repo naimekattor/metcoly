@@ -43,6 +43,7 @@ const item = {
 export default function SuperAdminDashboard() {
   const t = useTranslations('superAdmin.overview');
   const [bookingFilter, setBookingFilter] = useState('All');
+  const [applicationSearch, setApplicationSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [revenueTrend, setRevenueTrend] = useState<any[]>([]);
@@ -53,20 +54,50 @@ export default function SuperAdminDashboard() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const [statsRes, revRes, bookingsRes, appsRes] = await Promise.all([
+        const [statsResult, revResult, bookingsResult, appsResult] = await Promise.allSettled([
           analyticsAPI.getDashboardStats(),
           analyticsAPI.getRevenueAnalytics(),
           bookingsAPI.getAllBookings({ limit: 5 }),
           applicationsAPI.getAllApplications({ limit: 4 })
         ]);
 
-        setDashboardData(statsRes.data);
-        setRevenueTrend((revRes.data?.revenueByPeriod || []).map((r: any) => ({
-          month: r.period,
-          value: Number(r.total_amount)
-        })).reverse());
-        setRecentBookings(bookingsRes.data?.bookings || []);
-        setRecentApplications(appsRes.data?.applications || []);
+        if (statsResult.status === 'fulfilled') {
+          setDashboardData(statsResult.value?.data);
+        } else {
+          console.error('Failed to fetch dashboard stats:', statsResult.reason);
+        }
+
+        if (revResult.status === 'fulfilled') {
+          setRevenueTrend((revResult.value?.data?.revenueByPeriod || []).map((r: any) => ({
+            month: r.period,
+            value: Number(r.total_amount)
+          })).reverse());
+        } else {
+          console.error('Failed to fetch revenue analytics:', revResult.reason);
+        }
+
+        if (bookingsResult.status === 'fulfilled') {
+          const res = bookingsResult.value;
+          const bookingsArray = Array.isArray(res?.data?.bookings) ? res.data.bookings :
+                                Array.isArray(res?.data) ? res.data :
+                                Array.isArray(res) ? res : [];
+          setRecentBookings(bookingsArray);
+          console.log('bookingsArray', bookingsArray);
+        } else {
+          console.error('Failed to fetch bookings:', bookingsResult.reason);
+        }
+
+        if (appsResult.status === 'fulfilled') {
+          const res = appsResult.value;
+          const appsArray = Array.isArray(res?.data?.applications) ? res.data.applications :
+                            Array.isArray(res?.data) ? res.data :
+                            Array.isArray(res) ? res : [];
+          setRecentApplications(appsArray);
+          console.log('appsArray', appsArray);
+        } else {
+          console.error('Failed to fetch applications:', appsResult.reason);
+        }
+
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {
@@ -79,6 +110,16 @@ export default function SuperAdminDashboard() {
   const filteredBookings = bookingFilter === 'All' 
     ? recentBookings 
     : recentBookings.filter(b => b.bookingStatus === bookingFilter.toUpperCase());
+
+  const filteredApplications = recentApplications.filter(app => {
+    const searchLower = applicationSearch.toLowerCase();
+    const appNumber = (app.applicationNumber || app.id || '').toLowerCase();
+    const clientName = `${app.client?.firstName || ''} ${app.client?.lastName || ''}`.toLowerCase();
+    const serviceName = (app.service?.name || '').toLowerCase();
+    return appNumber.includes(searchLower) || clientName.includes(searchLower) || serviceName.includes(searchLower);
+  });
+  console.log("filteredApplications",filteredApplications,recentApplications);
+  
 
   const maxRevenue = Math.max(...revenueTrend.map(d => d.value), 1);
 
@@ -280,6 +321,8 @@ export default function SuperAdminDashboard() {
               <input 
                 type="text" 
                 placeholder="Search cases..." 
+                value={applicationSearch}
+                onChange={(e) => setApplicationSearch(e.target.value)}
                 className="text-xs bg-gray-50 border border-gray-100 rounded-lg pl-9 pr-4 py-2 outline-none focus:ring-1 focus:ring-[#0F2A4D] w-48 transition-all"
               />
             </div>
@@ -296,7 +339,7 @@ export default function SuperAdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {recentApplications.map((app, idx) => (
+                {filteredApplications.map((app, idx) => (
                   <tr key={idx} className="hover:bg-gray-50/80 transition-colors group">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">

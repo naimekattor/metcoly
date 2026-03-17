@@ -35,9 +35,10 @@ export default function ServicesPage() {
       setLoading(true);
       try {
         const res = await servicesAPI.getActiveServices();
-        if (res.status === 'success') {
-          setServices(res.data?.services || []);
-        }
+        const servicesArray = Array.isArray(res?.data?.services) ? res.data.services :
+                                Array.isArray(res?.data) ? res.data :
+                                Array.isArray(res) ? res : [];
+        setServices(servicesArray);
       } catch (error) {
         console.error('Error fetching services:', error);
       } finally {

@@ -163,10 +163,10 @@ export default function ApplicationsPage() {
       {/* ── STATS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
         {[
-          { label: t('stats.total'), value: '1,255', color: 'blue' },
-          { label: t('stats.inReview'), value: '184', color: 'amber' },
-          { label: t('stats.approved'), value: '845', color: 'emerald' },
-          { label: t('stats.rejected'), value: '104', color: 'rose' },
+          { label: t('stats.total'), value: filteredApps.length, color: 'blue' },
+          { label: t('stats.inReview'), value: filteredApps.filter(app => app.status === 'UNDER_REVIEW').length, color: 'amber' },
+          { label: t('stats.approved'), value: filteredApps.filter(app => app.status === 'APPROVED').length, color: 'emerald' },
+          { label: t('stats.rejected'), value: filteredApps.filter(app => app.status === 'REJECTED').length, color: 'rose' },
         ].map((stat, idx) => (
           <motion.div key={idx} variants={item} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{stat.label}</p>
@@ -255,22 +255,30 @@ export default function ApplicationsPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <select 
-                      value={app.status || 'PENDING'}
-                      onChange={(e) => handleStatusChange(app.id, e.target.value)}
-                      className={`appearance-none bg-transparent text-[10px] font-bold px-2 py-0.5 rounded outline-none cursor-pointer border transition-all ${
-                        app.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                        app.status === 'UNDER_REVIEW' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                        app.status === 'REJECTED' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                        'bg-amber-50 text-amber-600 border-amber-100'
-                      }`}
-                    >
-                      <option value="PENDING">Pending</option>
-                      <option value="UNDER_REVIEW">Under Review</option>
-                      <option value="APPROVED">Approved</option>
-                      <option value="REJECTED">Rejected</option>
-                    </select>
-                  </td>
+  <select 
+    value={app.status || 'DRAFT'}
+    onChange={(e) => handleStatusChange(app.id, e.target.value)}
+    className={`appearance-none bg-transparent text-[10px] font-bold px-2 py-0.5 rounded outline-none cursor-pointer border transition-all ${
+      app.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+      app.status === 'REJECTED' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+      app.status === 'UNDER_REVIEW' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+      app.status === 'PROCESSING' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+      app.status === 'DOCUMENTS_MISSING' ? 'bg-yellow-50 text-yellow-600 border-yellow-100' :
+      app.status === 'SUBMITTED' ? 'bg-purple-50 text-purple-600 border-purple-100' :
+      app.status === 'CLOSED' ? 'bg-gray-50 text-gray-600 border-gray-100' :
+      'bg-gray-50 text-gray-600 border-gray-100' 
+    }`}
+  >
+    <option value="DRAFT">Draft</option>
+    <option value="SUBMITTED">Submitted</option>
+    <option value="UNDER_REVIEW">Under Review</option>
+    <option value="DOCUMENTS_MISSING">Documents Missing</option>
+    <option value="PROCESSING">Processing</option>
+    <option value="APPROVED">Approved</option>
+    <option value="REJECTED">Rejected</option>
+    <option value="CLOSED">Closed</option>
+  </select>
+</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="relative group/priority max-w-[100px]">
                       <select 
