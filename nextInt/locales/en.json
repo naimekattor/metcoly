@@ -437,7 +437,7 @@
       "revenueGrowth": "Revenue Growth Trend",
       "appBreakdown": {
         "title": "Application Status Breakdown",
-        "subtitle": "Current distribution of 1,255 total cases",
+        "subtitle": "Total cases",
         "stats": {
           "total": "Total Cases",
           "inReview": "In Review",
@@ -573,6 +573,9 @@
       "subtitle": "Deep dive into platform performance and growth metrics",
       "last30Days": "Last 30 Days",
       "downloadReport": "Download Report",
+      "statusBreakdown": "Status Breakdown",
+      "topCountries": "Top Countries",
+      "consultantPerformance": "Consultant Performance",
       "performance": {
         "avgRevenue": "Avg. Revenue / User",
         "conversionRate": "Conversion Rate",
@@ -590,6 +593,13 @@
       "geographic": {
         "title": "Geographic Distribution",
         "activeUsers": "Active Users"
+      },
+      "table": {
+        "consultant": "Consultant",
+        "assigned": "Assigned",
+        "approved": "Approved",
+        "processing": "Avg. Processing",
+        "efficiency": "Efficiency"
       }
     },
     "system": {

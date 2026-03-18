@@ -23,6 +23,32 @@ import { analyticsAPI } from '@/lib/api/analytics';
 import { bookingsAPI } from '@/lib/api/bookings';
 import { applicationsAPI } from '@/lib/api/applications';
 
+// ── Interfaces ───────────────────────────────────────────────────────────────
+
+interface OverviewStats {
+  totalUsers: number;
+  totalConsultants: number;
+  totalClients: number;
+  totalApplications: number;
+  totalBookings: number;
+  totalRevenue: number;
+}
+
+interface MonthlyStats {
+  revenue: number;
+  revenueGrowth: number;
+  newApplications: number;
+  newBookings: number;
+}
+
+interface DashboardData {
+  overview: OverviewStats;
+  monthly: MonthlyStats;
+  applicationsByStatus: Record<string, number>;
+  bookingsByStatus: Record<string, number>;
+  recentActivity: any[];
+}
+
 // ── Components ───────────────────────────────────────────────────────────────
 
 const container = {
@@ -45,7 +71,7 @@ export default function SuperAdminDashboard() {
   const [bookingFilter, setBookingFilter] = useState('All');
   const [applicationSearch, setApplicationSearch] = useState('');
   const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [revenueTrend, setRevenueTrend] = useState<any[]>([]);
   const [recentBookings, setRecentBookings] = useState<any[]>([]);
   const [recentApplications, setRecentApplications] = useState<any[]>([]);
@@ -63,15 +89,44 @@ export default function SuperAdminDashboard() {
 
         if (statsResult.status === 'fulfilled') {
           setDashboardData(statsResult.value?.data);
+          console.log("dashboardData",dashboardData?.applicationsByStatus);
+          
         } else {
           console.error('Failed to fetch dashboard stats:', statsResult.reason);
         }
 
         if (revResult.status === 'fulfilled') {
-          setRevenueTrend((revResult.value?.data?.revenueByPeriod || []).map((r: any) => ({
-            month: r.period,
-            value: Number(r.total_amount)
-          })).reverse());
+          const rawData = revResult.value?.data?.revenueByPeriod || [];
+          const trendData = rawData.map((r: any) => {
+            // Backend returns YYYY-MM, YYYY-MM-DD or YYYY
+            let label = r.period;
+            try {
+              const dateParts = r.period.split('-');
+              let date;
+              if (dateParts.length === 1) { // YYYY
+                date = new Date(parseInt(dateParts[0]), 0, 1);
+              } else if (dateParts.length === 2) { // YYYY-MM
+                date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, 1);
+              } else { // YYYY-MM-DD
+                date = new Date(r.period);
+              }
+
+              if (!isNaN(date.getTime())) {
+                const options: Intl.DateTimeFormatOptions = dateParts.length === 1 
+                  ? { year: 'numeric' }
+                  : { month: 'short', year: '2-digit' };
+                label = new Intl.DateTimeFormat('en-US', options).format(date);
+              }
+            } catch (e) {
+              console.warn('Failed to parse date:', r.period);
+            }
+
+            return {
+              month: label,
+              value: Number(r.total_amount) || 0
+            };
+          }).reverse();
+          setRevenueTrend(trendData);
         } else {
           console.error('Failed to fetch revenue analytics:', revResult.reason);
         }
@@ -82,7 +137,6 @@ export default function SuperAdminDashboard() {
                                 Array.isArray(res?.data) ? res.data :
                                 Array.isArray(res) ? res : [];
           setRecentBookings(bookingsArray);
-          console.log('bookingsArray', bookingsArray);
         } else {
           console.error('Failed to fetch bookings:', bookingsResult.reason);
         }
@@ -93,7 +147,8 @@ export default function SuperAdminDashboard() {
                             Array.isArray(res?.data) ? res.data :
                             Array.isArray(res) ? res : [];
           setRecentApplications(appsArray);
-          console.log('appsArray', appsArray);
+          console.log("appsArray",appsArray);
+          
         } else {
           console.error('Failed to fetch applications:', appsResult.reason);
         }
@@ -118,13 +173,12 @@ export default function SuperAdminDashboard() {
     const serviceName = (app.service?.name || '').toLowerCase();
     return appNumber.includes(searchLower) || clientName.includes(searchLower) || serviceName.includes(searchLower);
   });
-  console.log("filteredApplications",filteredApplications,recentApplications);
   
 
   const maxRevenue = Math.max(...revenueTrend.map(d => d.value), 1);
 
-  const overview = dashboardData?.overview || {};
-  const monthly = dashboardData?.monthly || {};
+  const overview = dashboardData?.overview || {} as OverviewStats;
+  const monthly = dashboardData?.monthly || {} as MonthlyStats;
 
   const stats = [
     { label: t('totalRevenue'), value: `$${overview.totalRevenue || 0}`, change: `${monthly.revenueGrowth >= 0 ? '+' : ''}${monthly.revenueGrowth || 0}%`, icon: DollarSign, trend: monthly.revenueGrowth >= 0 ? 'up' : 'down' },
@@ -166,90 +220,87 @@ export default function SuperAdminDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── REVENUE BAR CHART (PURE CSS) ── */}
-        <motion.div variants={item} className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">{t('revenueGrowth')}</h3>
-              <p className="text-sm text-gray-400">Total revenue growth from last month: {monthly.revenueGrowth || 0}%</p>
-            </div>
-            <select className="text-xs bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 outline-none">
-              <option>Recent Trend</option>
-            </select>
-          </div>
-          
-          <div className="flex-1 flex items-end justify-between gap-2 sm:gap-4 h-64 px-2 relative">
-            {revenueTrend.length === 0 && !loading && (
-              <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-                No revenue data available.
-              </div>
-            )}
-            {revenueTrend.map((data, idx) => {
-              const heightPercentage = (data.value / maxRevenue) * 100;
-              return (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-3">
-                  <div className="w-full relative group">
-                    <motion.div 
-                      initial={{ height: 0 }}
-                      animate={{ height: `${heightPercentage}%` }}
-                      transition={{ duration: 1, delay: idx * 0.1, ease: 'easeOut' }}
-                      className="w-full bg-[#0F2A4D] rounded-t-lg group-hover:bg-[#c9a84c] transition-colors relative"
-                    >
-                      {/* Tooltip on hover */}
-                      <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                        ${data.value.toLocaleString()}
-                      </div>
-                    </motion.div>
-                  </div>
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{data.month}</span>
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
+      <div className="grid grid-cols-1  gap-6">
+        
 
-        {/* ── APPLICATION BREAKDOWN ── */}
         <motion.div variants={item} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h3 className="text-lg font-bold text-gray-900 mb-2">{t('appBreakdown.title')}</h3>
-          <p className="text-sm text-gray-400 mb-8">{t('appBreakdown.subtitle')}</p>
-          
-          <div className="space-y-6">
-            {[
-              { label: t('appBreakdown.stats.approved'), count: dashboardData?.applicationsByStatus?.APPROVED || 0, color: '#10b981' },
-              { label: t('appBreakdown.stats.inReview'), count: (dashboardData?.applicationsByStatus?.UNDER_REVIEW || 0) + (dashboardData?.applicationsByStatus?.SUBMITTED || 0), color: '#3b82f6' },
-              { label: t('appBreakdown.stats.rejected'), count: dashboardData?.applicationsByStatus?.REJECTED || 0, color: '#ef4444' },
-            ].map((status, idx) => {
-              const percentage = overview.totalApplications ? Math.round((status.count / overview.totalApplications) * 100) : 0;
-              return (
-              <div key={idx} className="space-y-2">
-                <div className="flex justify-between items-end">
-                  <span className="text-sm font-bold text-gray-700">{status.label}</span>
-                  <span className="text-sm font-bold text-[#0F2A4D]">{status.count}</span>
-                </div>
-                <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percentage}%` }}
-                    transition={{ duration: 1, delay: idx * 0.2, ease: 'easeOut' }}
-                    style={{ backgroundColor: status.color }}
-                    className="h-full rounded-full"
-                  />
-                </div>
-              </div>
-            )})}
+  <h3 className="text-lg font-bold text-gray-900 mb-2">{t('appBreakdown.title')}</h3>
+  <p className="text-sm text-gray-400 mb-8">{t('appBreakdown.subtitle')} {overview.totalApplications || 0}</p>
+  
+  <div className="space-y-6">
+    {[
+      { 
+        label: 'Approved', 
+        key: 'APPROVED',
+        count: recentApplications.filter(app => app.status === 'APPROVED').length, 
+        color: '#10b981' 
+      },
+      { 
+        label: 'Submitted', 
+        key: 'SUBMITTED',
+        count: recentApplications.filter(app => app.status === 'SUBMITTED').length, 
+        color: '#8b5cf6'  // Purple
+      },
+      { 
+        label: 'Under Review', 
+        key: 'UNDER_REVIEW',
+        count: recentApplications.filter(app => app.status === 'UNDER_REVIEW').length, 
+        color: '#3b82f6'  // Blue
+      },
+      { 
+        label: 'Documents Missing', 
+        key: 'DOCUMENTS_MISSING',
+        count: recentApplications.filter(app => app.status === 'DOCUMENTS_MISSING').length, 
+        color: '#f59e0b'  // Amber
+      },
+      { 
+        label: 'Processing', 
+        key: 'PROCESSING',
+        count: recentApplications.filter(app => app.status === 'PROCESSING').length, 
+        color: '#6366f1'  // Indigo
+      },
+      { 
+        label: 'Draft', 
+        key: 'DRAFT',
+        count: recentApplications.filter(app => app.status === 'DRAFT').length, 
+        color: '#9ca3af'  // Gray
+      },
+      { 
+        label: 'Rejected', 
+        key: 'REJECTED',
+        count: recentApplications.filter(app => app.status === 'REJECTED').length, 
+        color: '#ef4444'  // Red
+      },
+      { 
+        label: 'Closed', 
+        key: 'CLOSED',
+        count: recentApplications.filter(app => app.status === 'CLOSED').length, 
+        color: '#6b7280'  // Dark Gray
+      },
+    ].map((status, idx) => {
+      const totalApplications = recentApplications.length;
+      const percentage = totalApplications ? Math.round((status.count / totalApplications) * 100) : 0;
+      
+      return (
+        <div key={idx} className="space-y-2">
+          <div className="flex justify-between items-end">
+            <span className="text-sm font-bold text-gray-700">{status.label}</span>
+            <span className="text-sm font-bold text-[#0F2A4D]">{status.count}</span>
           </div>
-          
-          <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-500" />
-              <span className="text-xs text-gray-500 font-medium">85% Approval Rate</span>
-            </div>
-            <Link href="/dashboard/super-admin/applications" className="text-xs text-[#c9a84c] font-bold hover:underline">
-              {t('viewAll')}
-            </Link>
+          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${percentage}%` }}
+              transition={{ duration: 1, delay: idx * 0.2, ease: 'easeOut' }}
+              style={{ backgroundColor: status.color }}
+              className="h-full rounded-full"
+            />
           </div>
-        </motion.div>
+        </div>
+      );
+    })}
+  </div>
+</motion.div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
