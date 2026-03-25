@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { applicationsAPI } from '@/lib/api/applications';
 import { useAuthStore } from '@/store/authStore';
+import { paymentsAPI } from '@/lib/api/payments';
 import {
   FileText,
   AlertCircle,
@@ -91,19 +92,23 @@ export default function DashboardPage() {
   const { user } = useAuthStore();
   
   const [cases, setCases] = useState<Case[]>([]);
+  const [totalSpent, setTotalSpent] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   // Stats derived from actual cases
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const res = await applicationsAPI.getMyApplications();
+      // Fetch both applications and payments
+      const [appsRes, paymentsRes] = await Promise.all([
+        applicationsAPI.getMyApplications(),
+        paymentsAPI.getMyPayments()
+      ]);
       
       // Map API response to our UI type
-      // Check the exact structure your API returns. Here we expect an array in res.data or res
-      const applications = Array.isArray(res.data?.applications) 
-        ? res.data.applications 
-        : (Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []));
+      const applications = Array.isArray(appsRes.data?.applications) 
+        ? appsRes.data.applications 
+        : (Array.isArray(appsRes.data) ? appsRes.data : (Array.isArray(appsRes) ? appsRes : []));
       
       const mappedCases = applications.map((app: any) => {
         const date = new Date(app.createdAt || new Date());
@@ -117,9 +122,17 @@ export default function DashboardPage() {
       });
       
       setCases(mappedCases);
+
+      // Calculate total spent from PAID payments
+      const payments = paymentsRes.data?.payments || [];
+      const total = payments
+        .filter((p: any) => p.status === 'PAID')
+        .reduce((sum: number, p: any) => sum + (Number(p.amount) || 0), 0);
+      
+      setTotalSpent(total);
     } catch (err: any) {
-      console.error('Failed to load cases:', err);
-      toast.error('Failed to load your applications.');
+      console.error('Failed to load dashboard data:', err);
+      toast.error('Failed to load your dashboard data.');
     } finally {
       setLoading(false);
     }
@@ -129,16 +142,15 @@ export default function DashboardPage() {
     fetchDashboardData();
   }, []);
 
-  const activeCases = cases.filter(c => c.status !== 'Completed' && c.status !== 'Approved' && c.status !== 'Rejected').length;
-  // Pending actions could be defined by "Pending Documents" or similar status
-  const pendingActions = cases.filter(c => c.status === 'Pending Documents' || c.status === 'docsRequired').length;
-  const completedCases = cases.filter(c => c.status === 'Completed' || c.status === 'Approved').length;
+  const activeCases = cases.filter((c) => c.status !== 'Completed' && c.status !== 'Approved' && c.status !== 'Rejected').length;
+  const pendingActions = cases.filter((c) => c.status === 'Under Review' || c.status === 'inReview').length;
+  const completedCases = cases.filter((c) => c.status === 'Completed' || c.status === 'APPROVED').length;
 
   const stats = [
     { label: t('stats.activeCases'),     value: activeCases,   icon: FileText,    iconColor: 'text-gray-400'   },
     { label: t('stats.pendingActions'),  value: pendingActions,   icon: AlertCircle, iconColor: 'text-yellow-500' },
     { label: t('stats.completed'),       value: completedCases,   icon: CheckCircle2,iconColor: 'text-green-500'  },
-    { label: t('stats.totalSpent'),      value: '$0',icon: CreditCard,  iconColor: 'text-gray-400'   }, // To be updated if billing is added
+    { label: t('stats.totalSpent'),      value: `$${totalSpent.toLocaleString()}`, icon: CreditCard,  iconColor: 'text-gray-400'   },
   ];
   
   // Sort by newest for Recent Cases

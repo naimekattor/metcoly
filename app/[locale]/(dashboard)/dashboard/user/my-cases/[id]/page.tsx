@@ -186,36 +186,63 @@ export default function CaseDetailsPage({ params }: { params: Promise<{ id: stri
                 <p className="text-sm text-gray-500 mt-0.5">Track your application progress</p>
               </div>
               <div className="p-8">
-                <div className="relative space-y-8">
-                  {TIMELINE_STEPS.filter(step => !(step.key === 'DOCUMENTS_MISSING' && statusKey !== 'DOCUMENTS_MISSING')).map((step, idx, arr) => {
-                    const stepOrder = STATUS_ORDER[step.key] ?? 0;
-                    const completed = stepOrder < currentOrder || (step.key === statusKey && ['APPROVED', 'REJECTED', 'CLOSED'].includes(statusKey));
-                    const current = step.key === statusKey && !['APPROVED', 'REJECTED', 'CLOSED'].includes(statusKey);
-                    const historyEntry = application.statusHistory?.find((h: any) => h.newStatus === step.key);
+                <div className="relative space-y-8 before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100/50">
+                  {/* Initial Creation Step */}
+                  <div className="relative flex items-start group">
+                    <div className="relative flex items-center justify-center h-8 w-8 flex-shrink-0">
+                      <CheckCircle2 className="h-8 w-8 text-green-500 bg-white rounded-full z-10 shadow-sm" />
+                    </div>
+                    <div className="ml-5 min-w-0 flex flex-col flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-gray-900">Application Created</span>
+                        <span className="text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                          {formatDate(application.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 font-medium mt-1">Your application was successfully initiated.</p>
+                    </div>
+                  </div>
 
-                    return (
-                      <div key={step.key} className="relative flex items-start">
-                        {idx !== arr.length - 1 && (
-                          <div className={`absolute top-8 left-4 -ml-px h-full w-0.5 ${completed ? 'bg-green-400' : 'bg-gray-200'}`} />
-                        )}
-                        <div className="relative flex items-center justify-center h-8 w-8 flex-shrink-0">
-                          {completed ? (
-                            <CheckCircle2 className="h-8 w-8 text-green-500 bg-white rounded-full z-10" />
-                          ) : current ? (
-                            <Clock className="h-8 w-8 text-[#1b3d6e] bg-white rounded-full z-10" />
-                          ) : (
-                            <Circle className="h-8 w-8 text-gray-200 fill-white z-10" />
-                          )}
-                        </div>
-                        <div className="ml-5 min-w-0 flex flex-col">
-                          <span className={`text-sm font-bold ${completed || current ? 'text-gray-900' : 'text-gray-400'}`}>{step.label}</span>
-                          <span className="text-xs text-gray-400 font-medium mt-0.5">
-                            {historyEntry ? formatDate(historyEntry.changedAt) : (completed ? 'Completed' : 'Pending')}
+                  {/* Status History Steps */}
+                  {(application.statusHistory || []).slice().reverse().map((entry: any, i: number) => (
+                    <div key={entry.id || i} className="relative flex items-start group">
+                      <div className="relative flex items-center justify-center h-8 w-8 flex-shrink-0">
+                        <CheckCircle2 className="h-8 w-8 text-green-500 bg-white rounded-full z-10 shadow-sm" />
+                      </div>
+                      <div className="ml-5 min-w-0 flex flex-col flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-gray-900">
+                            {STATUS_LABEL[entry.newStatus] || entry.newStatus.replace(/_/g, ' ')}
+                          </span>
+                          <span className="text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                            {formatDate(entry.changedAt)}
                           </span>
                         </div>
+                        {entry.reason && (
+                          <p className="text-xs text-gray-500 font-medium mt-1 bg-gray-50 p-2 rounded-lg border border-gray-100/50">
+                            {entry.reason}
+                          </p>
+                        )}
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
+
+                  {/* Current Active Step (if not final) */}
+                  {!['APPROVED', 'REJECTED', 'CLOSED'].includes(statusKey) && (
+                    <div className="relative flex items-start group">
+                      <div className="relative flex items-center justify-center h-8 w-8 flex-shrink-0">
+                        <Clock className="h-8 w-8 text-[#1b3d6e] bg-white rounded-full z-10 animate-pulse" />
+                      </div>
+                      <div className="ml-5 min-w-0 flex flex-col flex-1">
+                        <span className="text-sm font-bold text-[#1b3d6e] animate-pulse">
+                          Current Status: {statusLabel}
+                        </span>
+                        <p className="text-xs text-gray-400 font-medium mt-1 italic">
+                          Last updated: {formatDate(application.updatedAt)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

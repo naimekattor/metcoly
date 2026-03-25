@@ -234,23 +234,57 @@ export default function SuperAdminApplicationDetailPage() {
 
             <div className="p-8">
               {activeTab === 'timeline' && (
-                <div className="space-y-8 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-100">
-                  {[
-                    { title: t('timeline.steps.submitted'), date: currentApp.submittedAt ? new Date(currentApp.submittedAt).toLocaleDateString() : 'Pending', done: !!currentApp.submittedAt },
-                    { title: t('timeline.steps.review'), date: currentApp.assignedAt ? new Date(currentApp.assignedAt).toLocaleDateString() : 'Pending', done: !!currentApp.assignedAt },
-                    { title: t('timeline.steps.docs'), date: currentApp.lastStatusChangeAt ? new Date(currentApp.lastStatusChangeAt).toLocaleDateString() : 'Pending', done: ['DOCUMENTS_MISSING', 'PROCESSING', 'APPROVED'].includes(currentApp.status) },
-                    { title: t('timeline.steps.submit'), date: currentApp.status === 'APPROVED' ? 'Approved' : 'Pending', done: currentApp.status === 'APPROVED' }
-                  ].map((step, i) => (
-                    <div key={i} className="flex gap-6 relative">
-                      <div className={`w-4 h-4 rounded-full border-2 z-10 ${
-                        step.done ? 'bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/30' : 'bg-white border-gray-200'
-                      }`} />
-                      <div>
-                        <p className="text-sm font-bold text-[#0F2A4D]">{step.title}</p>
-                        <p className="text-xs text-gray-400 font-medium mt-0.5">{step.date}</p>
+                <div className="space-y-8 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-100/50">
+                  {/* Initial Creation Step */}
+                  <div className="flex gap-6 relative group">
+                    <div className="w-4 h-4 rounded-full border-2 z-10 bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform" />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-bold text-[#0F2A4D]">{t('timeline.steps.submitted')}</p>
+                        <span className="text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                          {new Date(currentApp.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 font-medium mt-1">Application successfully initiated</p>
+                    </div>
+                  </div>
+
+                  {/* Status History Steps */}
+                  {(currentApp.statusHistory || []).slice().reverse().map((entry: any, i: number) => (
+                    <div key={entry.id || i} className="flex gap-6 relative group transform transition-all hover:translate-x-1">
+                      <div className="w-4 h-4 rounded-full border-2 z-10 bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform" />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold text-[#0F2A4D]">
+                            {entry.newStatus.replace(/_/g, ' ')}
+                          </p>
+                          <span className="text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-100">
+                            {new Date(entry.changedAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 font-medium mt-1 bg-[#F9FAFB] p-2 rounded-lg border border-gray-100/50">
+                          {entry.reason || 'Status updated by system'}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-2 opacity-60">
+                          <div className="w-1 h-1 rounded-full bg-gray-400" />
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">
+                            Changed By: {entry.changedBy?.firstName} {entry.changedBy?.lastName}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}
+
+                  {/* Future Step (only if not approved) */}
+                  {currentApp.status !== 'APPROVED' && currentApp.status !== 'REJECTED' && (
+                    <div className="flex gap-6 relative group opacity-50 grayscale-[0.5]">
+                      <div className="w-4 h-4 rounded-full border-2 z-10 bg-white border-gray-200" />
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-gray-400 italic">Next: Decision Pending</p>
+                        <p className="text-[10px] text-gray-300 font-medium mt-1">Final review in progress...</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
