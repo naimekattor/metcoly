@@ -173,15 +173,23 @@ export default function SuperAdminDashboard() {
     const serviceName = (app.service?.name || '').toLowerCase();
     return appNumber.includes(searchLower) || clientName.includes(searchLower) || serviceName.includes(searchLower);
   });
-  
 
-  const maxRevenue = Math.max(...revenueTrend.map(d => d.value), 1);
-
+  const locale = useLocale();
   const overview = dashboardData?.overview || {} as OverviewStats;
   const monthly = dashboardData?.monthly || {} as MonthlyStats;
 
   const stats = [
-    { label: t('totalRevenue'), value: `$${overview.totalRevenue || 0}`, change: `${monthly.revenueGrowth >= 0 ? '+' : ''}${monthly.revenueGrowth || 0}%`, icon: DollarSign, trend: monthly.revenueGrowth >= 0 ? 'up' : 'down' },
+    { 
+      label: t('totalRevenue'), 
+      value: new Intl.NumberFormat(locale === 'ar' ? 'ar-SA' : 'en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0
+      }).format(overview.totalRevenue || 0), 
+      change: `${monthly.revenueGrowth >= 0 ? '+' : ''}${monthly.revenueGrowth || 0}%`, 
+      icon: DollarSign, 
+      trend: monthly.revenueGrowth >= 0 ? 'up' : 'down' 
+    },
     { label: t('totalUsers'), value: overview.totalUsers || 0, change: '+0%', icon: Users, trend: 'up' },
     { label: t('totalConsultants'), value: overview.totalConsultants || 0, change: '+0%', icon: UserCheck, trend: 'up' },
     { label: t('activeBookings'), value: overview.totalBookings || 0, change: '+0%', icon: Calendar, trend: 'up' },
@@ -206,16 +214,11 @@ export default function SuperAdminDashboard() {
               <div className="p-3 rounded-xl bg-[#0F2A4D]/5 text-[#0F2A4D]">
                 <stat.icon size={22} />
               </div>
-              {/* <div className={`flex items-center gap-0.5 text-xs font-bold ${stat.trend === 'up' ? 'text-emerald-500' : 'text-rose-500'}`}>
-                {stat.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                {stat.change}
-              </div> */}
             </div>
             <div>
               <p className="text-sm font-medium text-gray-400">{stat.label}</p>
               <h3 className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</h3>
             </div>
-            
           </motion.div>
         ))}
       </div>
@@ -224,83 +227,44 @@ export default function SuperAdminDashboard() {
         
 
         <motion.div variants={item} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-  <h3 className="text-lg font-bold text-gray-900 mb-2">{t('appBreakdown.title')}</h3>
-  <p className="text-sm text-gray-400 mb-8">{t('appBreakdown.subtitle')} {overview.totalApplications || 0}</p>
-  
-  <div className="space-y-6">
-    {[
-      { 
-        label: 'Approved', 
-        key: 'APPROVED',
-        count: recentApplications.filter(app => app.status === 'APPROVED').length, 
-        color: '#10b981' 
-      },
-      { 
-        label: 'Submitted', 
-        key: 'SUBMITTED',
-        count: recentApplications.filter(app => app.status === 'SUBMITTED').length, 
-        color: '#8b5cf6'  // Purple
-      },
-      { 
-        label: 'Under Review', 
-        key: 'UNDER_REVIEW',
-        count: recentApplications.filter(app => app.status === 'UNDER_REVIEW').length, 
-        color: '#3b82f6'  // Blue
-      },
-      { 
-        label: 'Documents Missing', 
-        key: 'DOCUMENTS_MISSING',
-        count: recentApplications.filter(app => app.status === 'DOCUMENTS_MISSING').length, 
-        color: '#f59e0b'  // Amber
-      },
-      { 
-        label: 'Processing', 
-        key: 'PROCESSING',
-        count: recentApplications.filter(app => app.status === 'PROCESSING').length, 
-        color: '#6366f1'  // Indigo
-      },
-      { 
-        label: 'Draft', 
-        key: 'DRAFT',
-        count: recentApplications.filter(app => app.status === 'DRAFT').length, 
-        color: '#9ca3af'  // Gray
-      },
-      { 
-        label: 'Rejected', 
-        key: 'REJECTED',
-        count: recentApplications.filter(app => app.status === 'REJECTED').length, 
-        color: '#ef4444'  // Red
-      },
-      { 
-        label: 'Closed', 
-        key: 'CLOSED',
-        count: recentApplications.filter(app => app.status === 'CLOSED').length, 
-        color: '#6b7280'  // Dark Gray
-      },
-    ].map((status, idx) => {
-      const totalApplications = recentApplications.length;
-      const percentage = totalApplications ? Math.round((status.count / totalApplications) * 100) : 0;
-      
-      return (
-        <div key={idx} className="space-y-2">
-          <div className="flex justify-between items-end">
-            <span className="text-sm font-bold text-gray-700">{status.label}</span>
-            <span className="text-sm font-bold text-[#0F2A4D]">{status.count}</span>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">{t('appBreakdown.title')}</h3>
+          <p className="text-sm text-gray-400 mb-8">{t('appBreakdown.subtitle')} {overview.totalApplications || 0}</p>
+          
+          <div className="space-y-6">
+            {[
+              { label: 'Approved', key: 'APPROVED', color: '#10b981' },
+              { label: 'Submitted', key: 'SUBMITTED', color: '#8b5cf6' },
+              { label: 'Under Review', key: 'UNDER_REVIEW', color: '#3b82f6' },
+              { label: 'Documents Missing', key: 'DOCUMENTS_MISSING', color: '#f59e0b' },
+              { label: 'Processing', key: 'PROCESSING', color: '#6366f1' },
+              { label: 'Draft', key: 'DRAFT', color: '#9ca3af' },
+              { label: 'Rejected', key: 'REJECTED', color: '#ef4444' },
+              { label: 'Closed', key: 'CLOSED', color: '#6b7280' },
+            ].map((status, idx) => {
+              const count = dashboardData?.applicationsByStatus?.[status.key] || 0;
+              const totalApplications = overview.totalApplications || 0;
+              const percentage = totalApplications ? Math.round((count / totalApplications) * 100) : 0;
+              
+              return (
+                <div key={idx} className="space-y-2">
+                  <div className="flex justify-between items-end">
+                    <span className="text-sm font-bold text-gray-700">{status.label}</span>
+                    <span className="text-sm font-bold text-[#0F2A4D]">{count}</span>
+                  </div>
+                  <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${percentage}%` }}
+                      transition={{ duration: 1, delay: idx * 0.1, ease: 'easeOut' }}
+                      style={{ backgroundColor: status.color }}
+                      className="h-full rounded-full"
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${percentage}%` }}
-              transition={{ duration: 1, delay: idx * 0.2, ease: 'easeOut' }}
-              style={{ backgroundColor: status.color }}
-              className="h-full rounded-full"
-            />
-          </div>
-        </div>
-      );
-    })}
-  </div>
-</motion.div>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -405,12 +369,12 @@ export default function SuperAdminDashboard() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={app.status} />
+                      <StatusBadge status={app.status || 'DRAFT'} />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-gray-400">
-                      <button className="p-2 hover:bg-white rounded-lg hover:text-[#0F2A4D] transition-colors">
-                        <MoreVertical size={16} />
-                      </button>
+                      <Link href={`/dashboard/super-admin/applications/${app.id}`} className="p-2 hover:bg-white rounded-lg hover:text-[#0F2A4D] transition-colors inline-block">
+                        <ChevronRight size={16} />
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -418,9 +382,9 @@ export default function SuperAdminDashboard() {
             </table>
           </div>
           <div className="p-4 border-t border-gray-50 text-center">
-            <button className="text-xs font-bold text-[#0F2A4D] hover:underline flex items-center justify-center gap-1 mx-auto">
+            <Link href="/dashboard/super-admin/applications" className="text-xs font-bold text-[#0F2A4D] hover:underline flex items-center justify-center gap-1 mx-auto">
               {t('viewAll')} <ChevronRight size={14} />
-            </button>
+            </Link>
           </div>
         </motion.div>
       </div>
@@ -438,11 +402,15 @@ function StatusBadge({ status }: { status: string }) {
     'REJECTED': 'bg-rose-50 text-rose-600 border-rose-100',
     'UNDER_REVIEW': 'bg-indigo-50 text-indigo-600 border-indigo-100',
     'SUBMITTED': 'bg-indigo-50 text-indigo-600 border-indigo-100',
+    'PROCESSING': 'bg-blue-50 text-blue-600 border-blue-100',
+    'DRAFT': 'bg-gray-50 text-gray-500 border-gray-100',
+    'DOCUMENTS_MISSING': 'bg-orange-50 text-orange-600 border-orange-100',
+    'CLOSED': 'bg-neutral-50 text-neutral-500 border-neutral-100',
   };
 
   return (
     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${styles[status] || 'bg-gray-50 text-gray-500 border-gray-100'}`}>
-      {status.replace('_', ' ')}
+      {status.replace(/_/g, ' ')}
     </span>
   );
 }

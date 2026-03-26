@@ -44,8 +44,6 @@ export default function ServicesPage() {
                                 Array.isArray(res?.data) ? res.data :
                                 Array.isArray(res) ? res : [];
         
-        console.log('Final Calculated servicesArray:', servicesArray);
-        console.log('--- DEBUG END ---');
         setServices(servicesArray);
       } catch (error) {
         console.error('Error fetching services:', error);
@@ -55,6 +53,7 @@ export default function ServicesPage() {
     };
     fetchServices();
   }, []);
+
   return (
     <motion.div 
       variants={container}
@@ -75,17 +74,18 @@ export default function ServicesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {loading ? (
           <div className="col-span-full p-20 text-center text-gray-500">
-             Loading services...
+             <div className="inline-block w-8 h-8 border-4 border-gray-100 border-t-[#0F2A4D] rounded-full animate-spin mb-4"></div>
+             <p className="font-medium">Loading services...</p>
           </div>
         ) : services.length === 0 ? (
-          <div className="col-span-full p-20 text-center bg-red-500 rounded-2xl border border-dashed border-gray-200">
+          <div className="col-span-full p-20 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
             <Briefcase className="mx-auto text-gray-300 mb-4" size={48} />
             <h3 className="text-lg font-bold text-gray-900">No services found</h3>
             <p className="text-sm text-gray-500 max-w-xs mx-auto mt-2">There are no active services in the database. Please add a new service or ensure the backend server is restarted and data is seeded.</p>
           </div>
         ) : (
           services.map((service) => (
-            <motion.div key={service.id} variants={item} className="bg-red-600 p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group flex flex-col">
+            <motion.div key={service.id} variants={item} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group flex flex-col">
               <div className="flex justify-between items-start mb-4">
                 <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
                   <Briefcase size={22} />
@@ -107,7 +107,7 @@ export default function ServicesPage() {
                 {service.description}
               </p>
               
-              <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
+              <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between">
                 <div className="flex flex-col">
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('baseFee')}</span>
                   <span className="text-xl font-black text-[#0F2A4D]">${(Number(service.basePrice) || 0).toLocaleString()}</span>
