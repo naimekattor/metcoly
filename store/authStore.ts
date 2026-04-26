@@ -27,7 +27,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     isAuthenticated: false,
-    isLoading: true, // Initially true while we verify session on mount
+    isLoading: true, 
     error: null,
 
     login: async (credentials) => {
