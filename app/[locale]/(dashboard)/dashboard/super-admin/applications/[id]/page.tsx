@@ -53,6 +53,9 @@ export default function SuperAdminApplicationDetailPage() {
     setStatus(newStatus);
     try {
       await applicationsAPI.updateStatus(appId, newStatus, 'Status updated by Super Admin');
+      // Refresh app data to show new timeline entry
+      const res = await applicationsAPI.getApplication(appId);
+      setCurrentApp(res?.data?.application || res?.data || res);
     } catch (error) {
       console.error('Failed to update status', error);
       // Revert on failure
@@ -112,7 +115,7 @@ export default function SuperAdminApplicationDetailPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const STATUS_OPTIONS: CaseStatus[] = ['PENDING', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'DOCUMENTS_MISSING', 'PROCESSING'];
+  const STATUS_OPTIONS: CaseStatus[] = ['DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'DOCUMENTS_MISSING', 'PROCESSING', 'APPROVED', 'REJECTED', 'CLOSED'];
 
   if (loading) {
     return <div className="p-8 text-center text-gray-500">Loading application details...</div>;
@@ -121,6 +124,24 @@ export default function SuperAdminApplicationDetailPage() {
   if (!currentApp) {
     return <div className="p-8 text-center text-red-500">Application not found.</div>;
   }
+
+  const timelineEvents = [
+    ...(currentApp.statusHistory || []).map((h: any) => ({
+      title: h.newStatus.replace('_', ' '),
+      date: new Date(h.changedAt).toLocaleString(),
+      user: h.changedBy ? `${h.changedBy.firstName} ${h.changedBy.lastName}` : 'System',
+      role: h.changedBy?.role,
+      reason: h.reason,
+      done: true
+    })),
+    // Add initial creation if not in history
+    {
+      title: 'Application Created',
+      date: new Date(currentApp.createdAt).toLocaleString(),
+      user: 'Client',
+      done: true
+    }
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <motion.div 
@@ -174,7 +195,11 @@ export default function SuperAdminApplicationDetailPage() {
               </select>
             </div>
           </div>
-          <button className="bg-[#0F2A4D] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[#1a3b66] shadow-lg shadow-blue-900/10 transition-all">
+          <button 
+            onClick={() => handleStatusChange('APPROVED')}
+            disabled={status === 'APPROVED'}
+            className="bg-[#0F2A4D] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[#1a3b66] shadow-lg shadow-blue-900/10 transition-all disabled:opacity-50"
+          >
             {t_shared('actions.approve')}
           </button>
         </div>
@@ -235,19 +260,20 @@ export default function SuperAdminApplicationDetailPage() {
             <div className="p-8">
               {activeTab === 'timeline' && (
                 <div className="space-y-8 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-100">
-                  {[
-                    { title: t('timeline.steps.submitted'), date: currentApp.submittedAt ? new Date(currentApp.submittedAt).toLocaleDateString() : 'Pending', done: !!currentApp.submittedAt },
-                    { title: t('timeline.steps.review'), date: currentApp.assignedAt ? new Date(currentApp.assignedAt).toLocaleDateString() : 'Pending', done: !!currentApp.assignedAt },
-                    { title: t('timeline.steps.docs'), date: currentApp.lastStatusChangeAt ? new Date(currentApp.lastStatusChangeAt).toLocaleDateString() : 'Pending', done: ['DOCUMENTS_MISSING', 'PROCESSING', 'APPROVED'].includes(currentApp.status) },
-                    { title: t('timeline.steps.submit'), date: currentApp.status === 'APPROVED' ? 'Approved' : 'Pending', done: currentApp.status === 'APPROVED' }
-                  ].map((step, i) => (
+                  {timelineEvents.map((step, i) => (
                     <div key={i} className="flex gap-6 relative">
                       <div className={`w-4 h-4 rounded-full border-2 z-10 ${
                         step.done ? 'bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/30' : 'bg-white border-gray-200'
                       }`} />
-                      <div>
-                        <p className="text-sm font-bold text-[#0F2A4D]">{step.title}</p>
-                        <p className="text-xs text-gray-400 font-medium mt-0.5">{step.date}</p>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold text-[#0F2A4D] uppercase tracking-wide">{step.title}</p>
+                          <p className="text-[10px] text-gray-400 font-medium">{step.date}</p>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded uppercase">{step.user}</span>
+                          {step.reason && <span className="text-[10px] text-gray-400 italic">"{step.reason}"</span>}
+                        </div>
                       </div>
                     </div>
                   ))}

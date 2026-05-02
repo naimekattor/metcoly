@@ -53,7 +53,7 @@ export default function BookingsPage() {
     try {
       setLoading(true);
       const res = await bookingsAPI.getAllBookings();
-      setBookings(res.data || []);
+      setBookings(res.data.bookings || []);
     } catch (error) {
       console.error('Failed to fetch bookings', error);
     } finally {

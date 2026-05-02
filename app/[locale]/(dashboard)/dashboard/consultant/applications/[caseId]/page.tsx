@@ -149,6 +149,24 @@ export default function ConsultantApplicationDetailPage() {
     );
   }
 
+  const timelineEvents = [
+    ...(currentApp.statusHistory || []).map((h: any) => ({
+      title: h.newStatus.replace('_', ' '),
+      date: new Date(h.changedAt).toLocaleString(),
+      user: h.changedBy ? `${h.changedBy.firstName} ${h.changedBy.lastName}` : 'System',
+      role: h.changedBy?.role,
+      reason: h.reason,
+      done: true
+    })),
+    // Add initial creation if not in history
+    {
+      title: 'Application Created',
+      date: new Date(currentApp.createdAt).toLocaleString(),
+      user: 'Client',
+      done: true
+    }
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -268,24 +286,23 @@ export default function ConsultantApplicationDetailPage() {
                     exit={{ opacity: 0, x: 10 }}
                     className="space-y-8 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-gray-100"
                   >
-                    {[
-                      { title: t('timeline.steps.submitted'), date: currentApp.submittedAt ? new Date(currentApp.submittedAt).toLocaleDateString() : 'Pending', done: !!currentApp.submittedAt },
-                      { title: t('timeline.steps.review'), date: currentApp.assignedAt ? new Date(currentApp.assignedAt).toLocaleDateString() : 'Pending', done: !!currentApp.assignedAt },
-                      { title: t('timeline.steps.docs'), date: currentApp.lastStatusChangeAt ? new Date(currentApp.lastStatusChangeAt).toLocaleDateString() : 'Pending', done: ['DOCUMENTS_MISSING', 'PROCESSING', 'APPROVED'].includes(currentApp.status) },
-                      { title: t('timeline.steps.submit'), date: currentApp.status === 'APPROVED' ? 'Approved' : 'Pending', done: currentApp.status === 'APPROVED' }
-                    ].map((step, i) => (
+                    {timelineEvents.map((step, i) => (
                       <div key={i} className="flex gap-6 relative">
                         <div className={`w-4 h-4 rounded-full border-2 z-10 ${
                           step.done ? 'bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/30' : 'bg-white border-gray-200'
                         }`} />
-                        <div>
-                          <p className="text-sm font-bold text-[#0F2A4D]">{step.title}</p>
-                          <p className="text-xs text-gray-400 font-medium mt-0.5">{step.date}</p>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-bold text-[#0F2A4D] uppercase tracking-wide">{step.title}</p>
+                            <p className="text-[10px] text-gray-400 font-medium">{step.date}</p>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded uppercase">{step.user}</span>
+                            {step.reason && <span className="text-[10px] text-gray-400 italic">"{step.reason}"</span>}
+                          </div>
                         </div>
                       </div>
                     ))}
-                    
-                    {/* Add dynamic history link if needed, but matching super-admin exactly means this fixed list */}
                   </motion.div>
                 )}
 

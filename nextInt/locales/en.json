@@ -210,6 +210,7 @@
         "export": "Export CSV",
         "search": "Search cases...",
         "empty": "No applications found matching your criteria.",
+        "status": "Status",
         "cols": {
           "caseId": "Case ID",
           "client": "Client",
@@ -1055,6 +1056,35 @@
         "creating": "Creating account...",
         "haveAccount": "Already have an account?",
         "signIn": "Sign in"
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password?",
+      "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+      "email": "Email Address",
+      "sendLink": "Send Reset Link",
+      "sending": "Sending link...",
+      "backToLogin": "Back to login",
+      "success": {
+        "title": "Check Your Email",
+        "message": "We've sent a password reset link to {email}. Please check your inbox and follow the instructions."
+      }
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your new password below to reset your account access.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "reset": "Reset Password",
+      "resetting": "Resetting password...",
+      "success": {
+        "title": "Password Reset Successfully",
+        "message": "Your password has been reset successfully. You can now log in with your new password.",
+        "login": "Go to Login"
+      },
+      "errors": {
+        "mismatch": "Passwords do not match",
+        "invalidToken": "Invalid or expired reset token"
       }
     }
   },

@@ -210,6 +210,7 @@
         "export": "Exporter CSV",
         "search": "Rechercher des dossiers...",
         "empty": "Aucune demande trouvée correspondant à vos critères.",
+        "status": "Statut",
         "cols": {
           "caseId": "ID du dossier",
           "client": "Client",
@@ -1055,6 +1056,35 @@
         "creating": "Création du compte...",
         "haveAccount": "Vous avez déjà un compte ?",
         "signIn": "Se connecter"
+      }
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié ?",
+      "subtitle": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+      "email": "Adresse courriel",
+      "sendLink": "Envoyer le lien de réinitialisation",
+      "sending": "Envoi du lien...",
+      "backToLogin": "Retour à la connexion",
+      "success": {
+        "title": "Vérifiez votre e-mail",
+        "message": "Nous avons envoyé un lien de réinitialisation de mot de passe à {email}. Veuillez consulter votre boîte de réception et suivre les instructions."
+      }
+    },
+    "resetPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Entrez votre nouveau mot de passe ci-dessous pour réinitialiser l'accès à votre compte.",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le nouveau mot de passe",
+      "reset": "Réinitialiser le mot de passe",
+      "resetting": "Réinitialisation du mot de passe...",
+      "success": {
+        "title": "Mot de passe réinitialisé avec succès",
+        "message": "Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+        "login": "Aller à la connexion"
+      },
+      "errors": {
+        "mismatch": "Les mots de passe ne correspondent pas",
+        "invalidToken": "Jeton de réinitialisation invalide ou expiré"
       }
     }
   },

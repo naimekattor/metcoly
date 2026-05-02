@@ -182,40 +182,50 @@ export default function CaseDetailsPage({ params }: { params: Promise<{ id: stri
             {/* Timeline */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-50 bg-gray-50/30">
-                <h2 className="text-lg font-bold text-gray-900">Application Status</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Track your application progress</p>
+                <h2 className="text-lg font-bold text-gray-900">Application Timeline</h2>
+                <p className="text-sm text-gray-500 mt-0.5">Track your application progress and history</p>
               </div>
               <div className="p-8">
                 <div className="relative space-y-8">
-                  {TIMELINE_STEPS.filter(step => !(step.key === 'DOCUMENTS_MISSING' && statusKey !== 'DOCUMENTS_MISSING')).map((step, idx, arr) => {
-                    const stepOrder = STATUS_ORDER[step.key] ?? 0;
-                    const completed = stepOrder < currentOrder || (step.key === statusKey && ['APPROVED', 'REJECTED', 'CLOSED'].includes(statusKey));
-                    const current = step.key === statusKey && !['APPROVED', 'REJECTED', 'CLOSED'].includes(statusKey);
-                    const historyEntry = application.statusHistory?.find((h: any) => h.newStatus === step.key);
-
-                    return (
-                      <div key={step.key} className="relative flex items-start">
-                        {idx !== arr.length - 1 && (
-                          <div className={`absolute top-8 left-4 -ml-px h-full w-0.5 ${completed ? 'bg-green-400' : 'bg-gray-200'}`} />
+                  {[
+                    ...(application.statusHistory || []).map((h: any) => ({
+                      key: h.id,
+                      label: STATUS_LABEL[h.newStatus] || h.newStatus.replace('_', ' '),
+                      date: h.changedAt,
+                      completed: true,
+                      current: h.newStatus === application.status
+                    })),
+                    // Always show the creation event
+                    {
+                      key: 'creation',
+                      label: 'Application Created',
+                      date: application.createdAt,
+                      completed: true,
+                      current: application.status === 'DRAFT' && (!application.statusHistory || application.statusHistory.length === 0)
+                    }
+                  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((step, idx, arr) => (
+                    <div key={step.key} className="relative flex items-start">
+                      {idx !== arr.length - 1 && (
+                        <div className="absolute top-8 left-4 -ml-px h-full w-0.5 bg-gray-100" />
+                      )}
+                      <div className="relative flex items-center justify-center h-8 w-8 flex-shrink-0">
+                        {step.current ? (
+                          <Clock className="h-8 w-8 text-[#1b3d6e] bg-white rounded-full z-10 p-1 border-2 border-[#1b3d6e]" />
+                        ) : (
+                          <CheckCircle2 className="h-8 w-8 text-green-500 bg-white rounded-full z-10" />
                         )}
-                        <div className="relative flex items-center justify-center h-8 w-8 flex-shrink-0">
-                          {completed ? (
-                            <CheckCircle2 className="h-8 w-8 text-green-500 bg-white rounded-full z-10" />
-                          ) : current ? (
-                            <Clock className="h-8 w-8 text-[#1b3d6e] bg-white rounded-full z-10" />
-                          ) : (
-                            <Circle className="h-8 w-8 text-gray-200 fill-white z-10" />
-                          )}
-                        </div>
-                        <div className="ml-5 min-w-0 flex flex-col">
-                          <span className={`text-sm font-bold ${completed || current ? 'text-gray-900' : 'text-gray-400'}`}>{step.label}</span>
-                          <span className="text-xs text-gray-400 font-medium mt-0.5">
-                            {historyEntry ? formatDate(historyEntry.changedAt) : (completed ? 'Completed' : 'Pending')}
-                          </span>
-                        </div>
                       </div>
-                    );
-                  })}
+                      <div className="ml-5 min-w-0 flex flex-col flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-gray-900">{step.label}</span>
+                          <span className="text-[10px] text-gray-400 font-medium">{formatDate(step.date)}</span>
+                        </div>
+                        {step.current && (
+                          <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mt-0.5">Current Status</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

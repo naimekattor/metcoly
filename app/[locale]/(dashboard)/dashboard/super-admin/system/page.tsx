@@ -68,7 +68,7 @@ export default function SystemPage() {
       try {
         setLoadingServices(true);
         const res = await servicesAPI.getActiveServices();
-        setServices(res.data || []);
+        setServices(res.data.services || []);
       } catch (error) {
         console.error('Failed to load services', error);
       } finally {
@@ -80,7 +80,7 @@ export default function SystemPage() {
       try {
         setLoadingLogs(true);
         const res = await analyticsAPI.getActivityLogs();
-        setLogs(res.data || []);
+        setLogs(res.data.logs || []);
       } catch (error) {
         console.error('Failed to load activity logs', error);
       } finally {
