@@ -17,10 +17,14 @@ import {
   Hash,
   Tag,
   Globe,
+  Upload,
+  X,
+  RefreshCw,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { applicationsAPI } from '@/lib/api/applications';
 import { paymentsAPI } from '@/lib/api/payments';
+import { documentsAPI } from '@/lib/api/documents';
 
 // Backend status → display label
 const STATUS_LABEL: Record<string, string> = {
@@ -81,6 +85,12 @@ export default function CaseDetailsPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [payingNow, setPayingNow] = useState(false);
 
+  // Upload state
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadType, setUploadType] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
   useEffect(() => {
     const fetchApp = async () => {
       try {
@@ -110,6 +120,34 @@ export default function CaseDetailsPage({ params }: { params: Promise<{ id: stri
       toast.error(err?.response?.data?.message || 'Payment initiation failed.');
       setPayingNow(false);
     }
+  };
+
+  const handleUpload = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadFile) return toast.error('Please select a file');
+    if (!uploadType.trim()) return toast.error('Please specify a document type');
+
+    try {
+      setIsUploading(true);
+      await documentsAPI.uploadDocument(uploadFile, id, uploadType);
+      toast.success('Document uploaded successfully');
+      setIsUploadModalOpen(false);
+      setUploadFile(null);
+      setUploadType('');
+      // Refresh application data
+      const res = await applicationsAPI.getApplication(id);
+      setApplication(res.data?.application ?? res.data ?? res);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Upload failed');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const openResubmitModal = (docType: string) => {
+    setUploadType(docType);
+    setUploadFile(null);
+    setIsUploadModalOpen(true);
   };
 
   if (loading) {
@@ -232,9 +270,22 @@ export default function CaseDetailsPage({ params }: { params: Promise<{ id: stri
 
             {/* Documents */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-50 bg-gray-50/30">
-                <h2 className="text-lg font-bold text-gray-900">Uploaded Documents</h2>
-                <p className="text-sm text-gray-500 mt-0.5">{documents.length} file{documents.length !== 1 ? 's' : ''} submitted</p>
+              <div className="px-6 py-5 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">Uploaded Documents</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">{documents.length} file{documents.length !== 1 ? 's' : ''} submitted</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setUploadType('');
+                    setUploadFile(null);
+                    setIsUploadModalOpen(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#1b3d6e]/10 text-[#1b3d6e] text-sm font-bold rounded-lg hover:bg-[#1b3d6e]/20 transition-colors"
+                >
+                  <Upload size={16} />
+                  Upload Document
+                </button>
               </div>
               <div className="divide-y divide-gray-100">
                 {documents.length === 0 ? (
@@ -253,6 +304,14 @@ export default function CaseDetailsPage({ params }: { params: Promise<{ id: stri
                           </p>
                         </div>
                       </div>
+                      <button
+                        onClick={() => openResubmitModal(doc.documentType || 'Document')}
+                        title="Resubmit this document"
+                        className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-gray-500 bg-gray-100 rounded-md hover:bg-gray-200 hover:text-gray-900 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <RefreshCw size={14} />
+                        Resubmit
+                      </button>
                     </div>
                   ))
                 )}
@@ -351,6 +410,56 @@ export default function CaseDetailsPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
       </div>
+
+      {/* Upload Modal */}
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Upload Document</h3>
+              <button
+                onClick={() => setIsUploadModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleUpload} className="p-6 flex flex-col gap-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Document Type</label>
+                <input
+                  type="text"
+                  required
+                  value={uploadType}
+                  onChange={(e) => setUploadType(e.target.value)}
+                  placeholder="e.g. Passport, Resume, Medical Info"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1b3d6e]/20 focus:border-[#1b3d6e]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Select File</label>
+                <input
+                  type="file"
+                  required
+                  onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#1b3d6e]/5 file:text-[#1b3d6e] hover:file:bg-[#1b3d6e]/10 cursor-pointer"
+                />
+              </div>
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isUploading || !uploadFile || !uploadType.trim()}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#1b3d6e] text-white text-sm font-bold rounded-xl hover:bg-[#152e53] disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isUploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+                  {isUploading ? 'Uploading...' : 'Upload Now'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

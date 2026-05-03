@@ -116,6 +116,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const[errorMsg,setErrorMsg]=useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,6 +135,7 @@ function LoginForm() {
         router.push('/dashboard/user');
       }
     } catch (err: any) {
+      setErrorMsg(err.response?.data?.message || err.message || 'Login failed');
       error(err.response?.data?.message || err.message || 'Login failed');
     } finally {
       setLoading(false);
@@ -244,6 +246,9 @@ function LoginForm() {
               </>
             ) : t('signIn')}
           </button>
+          {errorMsg && (
+            <p className='text-red-400 text-sm text-center'>{errorMsg}</p>
+          )}
 
           {/* Divider */}
           <div className="flex items-center gap-3">
