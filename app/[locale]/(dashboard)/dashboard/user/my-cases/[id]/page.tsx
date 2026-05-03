@@ -78,6 +78,15 @@ function formatBytes(bytes: number | bigint) {
   return `${(n / (1024 * 1024)).toFixed(2)} MB`;
 }
 
+const PREDEFINED_DOC_TYPES = [
+  "Passport Copy",
+  "Passport Size Photo",
+  "Birth Certificate",
+  "Education Certificate",
+  "Employment Letter",
+  "Financial Documents"
+];
+
 export default function CaseDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
 
@@ -427,14 +436,20 @@ export default function CaseDetailsPage({ params }: { params: Promise<{ id: stri
             <form onSubmit={handleUpload} className="p-6 flex flex-col gap-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Document Type</label>
-                <input
-                  type="text"
+                <select
                   required
                   value={uploadType}
                   onChange={(e) => setUploadType(e.target.value)}
-                  placeholder="e.g. Passport, Resume, Medical Info"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1b3d6e]/20 focus:border-[#1b3d6e]"
-                />
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1b3d6e]/20 focus:border-[#1b3d6e] bg-white"
+                >
+                  <option value="" disabled>Select Document Type</option>
+                  {PREDEFINED_DOC_TYPES.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                  {uploadType && !PREDEFINED_DOC_TYPES.includes(uploadType) && (
+                    <option value={uploadType}>{uploadType}</option>
+                  )}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Select File</label>

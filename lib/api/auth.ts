@@ -20,5 +20,9 @@ export const authAPI = {
     refreshToken: async () => {
         const response = await apiClient.post('/auth/refresh-token');
         return response.data;
+    },
+    changePassword: async (data: any) => {
+        const response = await apiClient.patch('/auth/change-password', data);
+        return response.data;
     }
 };

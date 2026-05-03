@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Link } from '@/nextInt/navigation';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
+import { authAPI } from '@/lib/api/auth';
 import { usersAPI } from '@/lib/api/users';
 import { useAuthStore } from '@/store/authStore';
 import {
@@ -213,13 +214,20 @@ function SecuritySection() {
   const [showNew, setShowNew]         = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+
   const PwdInput = ({
-    show, toggle, placeholder,
-  }: { show: boolean; toggle: () => void; placeholder?: string }) => (
+    show, toggle, placeholder, value, onChange
+  }: { show: boolean; toggle: () => void; placeholder?: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
     <div className="relative">
       <input
         type={show ? 'text' : 'password'}
         placeholder={placeholder}
+        value={value}
+        onChange={onChange}
         className={`${inputCls} pr-10`}
       />
       <button
@@ -232,22 +240,49 @@ function SecuritySection() {
     </div>
   );
 
+  const handleUpdate = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error('Please fill in all password fields');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    try {
+      setSaving(true);
+      await authAPI.changePassword({ currentPassword, newPassword });
+      toast.success(t('update') + ' successful');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to update password');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <SectionCard icon={Shield} iconBg="bg-[#1b3d6e]" title={t('title')} subtitle={t('subtitle')}>
       <div className="flex flex-col gap-4">
         <Field label={t('currentPassword')}>
-          <PwdInput show={showCurrent} toggle={() => setShowCurrent((v) => !v)} placeholder="••••••••" />
+          <PwdInput show={showCurrent} toggle={() => setShowCurrent((v) => !v)} placeholder="••••••••" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
         </Field>
         <Field label={t('newPassword')}>
-          <PwdInput show={showNew} toggle={() => setShowNew((v) => !v)} placeholder="••••••••" />
+          <PwdInput show={showNew} toggle={() => setShowNew((v) => !v)} placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
           <p className="text-[11px] text-gray-400 mt-1">{t('passwordHint')}</p>
         </Field>
         <Field label={t('confirmPassword')}>
-          <PwdInput show={showConfirm} toggle={() => setShowConfirm((v) => !v)} placeholder="••••••••" />
+          <PwdInput show={showConfirm} toggle={() => setShowConfirm((v) => !v)} placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
         </Field>
         <div className="flex justify-end pt-2">
-          {/* Action not wired as custom backend password schema may vary */}
-          <SaveBtn label={t('update')} color="green" onClick={() => toast.success('Password update functionality ready to wire')} />
+          <SaveBtn label={t('update')} color="green" onClick={handleUpdate} saving={saving} />
         </div>
       </div>
     </SectionCard>
@@ -257,7 +292,29 @@ function SecuritySection() {
 // ── Notifications Section ─────────────────────────────────────────────────────
 function NotificationsSection() {
   const t = useTranslations('settings.notifications');
+  const { user, fetchUser } = useAuthStore();
   const [emailOn, setEmailOn] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setEmailOn((user as any).emailNotifications ?? true);
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await usersAPI.updateProfile({ emailNotifications: emailOn });
+      await fetchUser();
+      toast.success('Preferences saved');
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to save preferences');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <SectionCard icon={Bell} iconBg="bg-yellow-500" title={t('title')} subtitle={t('subtitle')}>
@@ -270,7 +327,7 @@ function NotificationsSection() {
           <Toggle checked={emailOn} onChange={() => setEmailOn((v) => !v)} />
         </div>
         <div className="flex justify-end pt-2">
-          <SaveBtn label={t('save')} onClick={() => toast.success('Preferences saved')} />
+          <SaveBtn label={t('save')} onClick={handleSave} saving={saving} />
         </div>
       </div>
     </SectionCard>
@@ -280,7 +337,33 @@ function NotificationsSection() {
 // ── Language Section ──────────────────────────────────────────────────────────
 function LanguageSection() {
   const t = useTranslations('settings.language');
+  const { user, fetchUser } = useAuthStore();
   const [lang, setLang] = useState<'en' | 'fr'>('en');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (user && (user as any).displayLanguage) {
+      setLang((user as any).displayLanguage as 'en' | 'fr');
+    }
+  }, [user]);
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      await usersAPI.updateProfile({ displayLanguage: lang });
+      await fetchUser();
+      toast.success('Language preferences updated.');
+      
+      // Force reload the page to apply the language change via middleware
+      // We check if current path has the lang prefix to replace it, or just reload
+      window.location.href = `/${lang}/dashboard/user/settings`;
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Failed to update language');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <SectionCard icon={Globe} iconBg="bg-teal-500" title={t('title')} subtitle={t('subtitle')}>
@@ -312,7 +395,7 @@ function LanguageSection() {
           </div>
         </div>
         <div className="flex justify-end pt-2">
-          <SaveBtn label={t('save')} onClick={() => toast.success('Language preferences updated. Consider applying router refresh to switch app locale.')} />
+          <SaveBtn label={t('save')} onClick={handleSave} saving={saving} />
         </div>
       </div>
     </SectionCard>

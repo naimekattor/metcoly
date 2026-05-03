@@ -91,6 +91,8 @@ export default function DashboardPage() {
   const { user } = useAuthStore();
   
   const [cases, setCases] = useState<Case[]>([]);
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [recentActivities, setRecentActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Stats derived from actual cases
@@ -105,8 +107,33 @@ export default function DashboardPage() {
         ? res.data.applications 
         : (Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []));
       
+      let calculatedTotalSpent = 0;
+      let allActivities: any[] = [];
+
       const mappedCases = applications.map((app: any) => {
         const date = new Date(app.createdAt || new Date());
+        
+        // Calculate total spent from PAID payments
+        if (app.payments && Array.isArray(app.payments)) {
+          app.payments.forEach((payment: any) => {
+            if (payment.status === 'PAID') {
+              calculatedTotalSpent += Number(payment.amount) || 0;
+            }
+          });
+        }
+
+        // Collect activities
+        if (app.statusHistory && Array.isArray(app.statusHistory)) {
+          app.statusHistory.forEach((history: any) => {
+            allActivities.push({
+              id: history.id,
+              message: `Case #${app.applicationNumber || app.id.slice(0, 8).toUpperCase()} moved to ${history.newStatus.replace('_', ' ')}`,
+              time: timeSince(new Date(history.changedAt)),
+              rawDate: new Date(history.changedAt)
+            });
+          });
+        }
+
         return {
           id: app.applicationId || app.id || 'N/A',
           type: app.service?.name || app.type || 'General Application',
@@ -116,7 +143,11 @@ export default function DashboardPage() {
         };
       });
       
+      allActivities.sort((a, b) => b.rawDate.getTime() - a.rawDate.getTime());
+      
       setCases(mappedCases);
+      setTotalSpent(calculatedTotalSpent);
+      setRecentActivities(allActivities.slice(0, 2).map(a => ({ id: a.id, message: a.message, time: a.time })));
     } catch (err: any) {
       console.error('Failed to load cases:', err);
       toast.error('Failed to load your applications.');
@@ -138,13 +169,11 @@ export default function DashboardPage() {
     { label: t('stats.activeCases'),     value: activeCases,   icon: FileText,    iconColor: 'text-gray-400'   },
     { label: t('stats.pendingActions'),  value: pendingActions,   icon: AlertCircle, iconColor: 'text-yellow-500' },
     { label: t('stats.completed'),       value: completedCases,   icon: CheckCircle2,iconColor: 'text-green-500'  },
-    { label: t('stats.totalSpent'),      value: '$0',icon: CreditCard,  iconColor: 'text-gray-400'   }, // To be updated if billing is added
+    { label: t('stats.totalSpent'),      value: `$${totalSpent.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`,icon: CreditCard,  iconColor: 'text-gray-400'   }, 
   ];
   
   // Sort by newest for Recent Cases
   const recentCases = [...cases].slice(0, 5);
-
-  const MOCK_ACTIVITY: ActivityItem[] = [];
 
   return (
     <div className="min-h-screen ">
@@ -235,14 +264,14 @@ export default function DashboardPage() {
 
             {/* Activity list */}
             <div className="px-6 py-4 flex-1 overflow-y-auto">
-              {MOCK_ACTIVITY.length === 0 ? (
+              {recentActivities.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 gap-3">
                   <Activity size={24} className="text-gray-300" />
                   <p className="text-gray-400 text-sm">{t('activity.empty')}</p>
                 </div>
               ) : (
                 <ul className="space-y-4">
-                  {MOCK_ACTIVITY.map((item) => (
+                  {recentActivities.map((item) => (
                     <li key={item.id} className="flex items-start gap-3">
                       <div className="w-2 h-2 rounded-full bg-[#1b3d6e] mt-1.5 flex-shrink-0" />
                       <div>
